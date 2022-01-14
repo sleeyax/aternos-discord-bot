@@ -315,6 +315,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 							Color:       colorMap[aternos.Offline],
 							Footer:      footer,
 						})
+						ab.serverInfo = &info
 						return
 					case aternos.Preparing: // stuck in queue (only happens when traffic is high)
 						if (info.StatusLabelClass == "queueing" && info.Queue.Status == "pending") && (ab.serverInfo.Queue.Status != "pending") {
