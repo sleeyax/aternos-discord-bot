@@ -56,6 +56,11 @@ func main() {
 }
 ```
 
+### Docker
+You can also run the bot in a docker container:
+
+`$ docker run -d --name aternos-discord-bot -e DISCORD_TOKEN="" -e ATERNOS_SESSION="" -e ATERNOS_SERVER="" sleeyax/aternos-discord-bot`
+
 ## License
 Licensed under `MIT License`.
 
