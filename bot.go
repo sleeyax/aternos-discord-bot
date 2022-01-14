@@ -285,25 +285,24 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 				case "status":
 					var info aternos.ServerInfo
 					json.Unmarshal(msg.MessageBytes, &info)
-					ab.serverInfo = &info
 
 					switch info.Status {
 					case aternos.Online:
 						if info.Countdown != 0 {
 							s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 								Title:       "Server is online",
-								Description: fmt.Sprintf("Join now! Only %d seconds left.", ab.serverInfo.Countdown),
+								Description: fmt.Sprintf("Join now! Only %d seconds left.", info.Countdown),
 								Color:       colorMap[aternos.Online],
 								Footer:      footer,
 								Fields: []*discordgo.MessageEmbedField{
 									&discordgo.MessageEmbedField{
 										Name:   "Server address",
-										Value:  fmt.Sprintf("`%s:%d`", ab.serverInfo.Address, ab.serverInfo.Port),
+										Value:  fmt.Sprintf("`%s:%d`", info.Address, info.Port),
 										Inline: true,
 									},
 									&discordgo.MessageEmbedField{
 										Name:   "Dyn IP",
-										Value:  fmt.Sprintf("`%s`", ab.serverInfo.DynIP),
+										Value:  fmt.Sprintf("`%s`", info.DynIP),
 										Inline: true,
 									},
 								},
@@ -318,14 +317,15 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 						})
 						return
 					case aternos.Preparing: // stuck in queue (only happens when traffic is high)
-						if info.Queue.Position != 0 {
+						if info.StatusLabelClass == "queueing" && info.Queue.Status == "pending" {
 							s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
-						} else {
 							go ab.api.ConfirmServer(ctxConfirm, 10*time.Second)
 						}
 					case aternos.Loading:
 						cancelConfirm()
 					}
+
+					ab.serverInfo = &info
 				}
 			}
 		}()
