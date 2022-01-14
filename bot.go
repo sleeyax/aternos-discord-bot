@@ -162,7 +162,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 			break
 		} else if msg == "players" {
 			if len(info.PlayerList) == 0 {
-				s.ChannelMessageSend(m.ChannelID, "No active players found.")
+				s.ChannelMessageSend(m.ChannelID, "No one is playing right now :(")
 				break
 			}
 
@@ -243,6 +243,11 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 			},
 		})
 	case "start":
+		if ab.serverInfo != nil && ab.serverInfo.Status != aternos.Offline && ab.serverInfo.Status != aternos.Stopping {
+			s.ChannelMessageSend(m.ChannelID, "Server already started! Type `!status` or `!info` to fetch the status.")
+			break
+		}
+
 		// Connect to the websocket server.
 		if _, err := ab.getWSS(); err != nil {
 			s.ChannelMessageSend(m.ChannelID, "**Failed to connect to WSS.**")
@@ -259,22 +264,17 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 				cancel()
 				ab.wss.Close()
 				ab.wss = nil
+				log.Println("Background routines stopped & connections closed.")
 			}()
 
 			for {
 				msg := <-ab.wss.Message
 				switch msg.Type {
 				case "ready":
-					// Start the server if it wasn't started already.
+					// Start the server.
 					if err := ab.api.StartServer(); err != nil {
-						if err == aternos.ServerAlreadyStartedError {
-							s.ChannelMessageSend(m.ChannelID, "Server already started! Use `!status` or `!info` to fetch the status.")
-							break
-						}
-
 						s.ChannelMessageSend(m.ChannelID, "**Failed to start server.**")
 						log.Println("failed to start server:", err)
-
 						return
 					}
 
@@ -285,7 +285,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 					json.Unmarshal(msg.MessageBytes, &info)
 					ab.serverInfo = &info
 
-					if ab.serverInfo.Status == aternos.Online {
+					if info.Status == aternos.Online && info.Countdown != 0 {
 						s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 							Title:       "Server is online",
 							Description: fmt.Sprintf("Join now! Only %d seconds left.", ab.serverInfo.Countdown),
@@ -304,7 +304,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 								},
 							},
 						})
-					} else if ab.serverInfo.Status == aternos.Offline {
+					} else if info.Status == aternos.Offline {
 						s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 							Title:       "Server is offline",
 							Description: "The server is currently offline.",
@@ -317,6 +317,11 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 			}
 		}()
 	case "stop":
+		if ab.serverInfo != nil && (ab.serverInfo.Status == aternos.Stopping || ab.serverInfo.Status == aternos.Offline) {
+			s.ChannelMessageSend(m.ChannelID, "Server already stopped! Type `!status` or `!info` to fetch the status.")
+			break
+		}
+
 		if _, err := ab.getWSS(); err != nil {
 			s.ChannelMessageSend(m.ChannelID, "**Failed to connect to WSS.**")
 			log.Println("failed to connect to WSS:", err)
@@ -324,13 +329,8 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 		}
 
 		if err := ab.api.StopServer(); err != nil {
-			if err == aternos.ServerAlreadyStoppedError {
-				s.ChannelMessageSend(m.ChannelID, "Server already stopped!")
-				break
-			}
-
-			s.ChannelMessageSend(m.ChannelID, "**Failed to stop server.**")
-			log.Println("failed to stop server manually:", err)
+			s.ChannelMessageSend(m.ChannelID, "**Failed to stop the server.**")
+			log.Println("failed to stop the server manually:", err)
 			break
 		}
 
