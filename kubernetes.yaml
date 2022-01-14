@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aternos-discord-bot
+  labels:
+    app: aternos-discord-bot
+  namespace: sleeyax-discord
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aternos-discord-bot
+  template:
+    metadata:
+      labels:
+        app: aternos-discord-bot
+    spec:
+      containers:
+        - name: aternos-discord-bot
+          image: sleeyax/aternos-discord-bot:0.1.0
+          env:
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: aternos-secrets
+                  key: DISCORD_TOKEN
+            - name: ATERNOS_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: aternos-secrets
+                  key: ATERNOS_SERVER
+            - name: ATERNOS_SESSION
+              valueFrom:
+                secretKeyRef:
+                  name: aternos-secrets
+                  key: ATERNOS_SESSION
