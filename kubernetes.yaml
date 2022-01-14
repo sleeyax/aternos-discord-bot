@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: aternos-discord-bot
-          image: sleeyax/aternos-discord-bot:0.1.1
+          image: sleeyax/aternos-discord-bot:0.1.2
           env:
             - name: DISCORD_TOKEN
               valueFrom:
