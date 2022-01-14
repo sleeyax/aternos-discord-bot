@@ -1,12 +1,15 @@
 package aternos_discord_bot
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type AternosBot struct {
@@ -32,6 +35,9 @@ type AternosBot struct {
 	// Current server status.
 	// This is basically only used as a cache for the info command.
 	serverInfo *aternos.ServerInfo
+
+	// Current active websocket connection.
+	wss *aternos.Websocket
 }
 
 func (ab *AternosBot) setup() {
@@ -75,7 +81,9 @@ func (ab *AternosBot) Stop() error {
 	return ab.discord.Close()
 }
 
-func (ab *AternosBot) GetServerInfo() (*aternos.ServerInfo, error) {
+// getServerInfo returns the current server info.
+// If the status is not known yet, it wil be (re)fetched and cached in memory.
+func (ab *AternosBot) getServerInfo() (*aternos.ServerInfo, error) {
 	if ab.serverInfo == nil {
 		info, err := ab.api.GetServerInfo()
 		if err != nil {
@@ -85,6 +93,33 @@ func (ab *AternosBot) GetServerInfo() (*aternos.ServerInfo, error) {
 	}
 
 	return ab.serverInfo, nil
+}
+
+// getWSS connects to the Aternos websocket server and stores the active connection in memory for later use.
+func (ab *AternosBot) getWSS() (*aternos.Websocket, error) {
+	if ab.wss == nil {
+		wss, err := ab.api.ConnectWebSocket()
+		if err != nil {
+			return nil, err
+		}
+		ab.wss = wss
+	}
+
+	return ab.wss, nil
+}
+
+func (ab *AternosBot) sendHeartBeats(context context.Context) {
+	ticker := time.NewTicker(time.Millisecond * 49000)
+
+	for {
+		select {
+		case <-context.Done():
+			ticker.Stop()
+			return
+		case <-ticker.C:
+			ab.wss.SendHeartBeat()
+		}
+	}
 }
 
 // Called whenever a message is created on any channel that the authenticated bot has access to.
@@ -101,6 +136,10 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 
 	msg := strings.TrimLeft(m.Content, ab.Prefix)
 
+	footer := &discordgo.MessageEmbedFooter{
+		Text: "Made with <3 by Sleeyax.",
+	}
+
 	switch msg {
 	case "ping":
 		s.ChannelMessageSend(m.ChannelID, "Pong!")
@@ -111,10 +150,10 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 	case "info":
 		fallthrough
 	case "players":
-		info, err := ab.GetServerInfo()
+		info, err := ab.getServerInfo()
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "**Unexpected error while fetching info.**")
-			log.Println(err)
+			log.Println("failed to fetch server info:", err)
 			break
 		}
 
@@ -140,9 +179,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 			Title:       "Server info",
 			Description: fmt.Sprintf("Server '%s' is currently **%s**.", info.Name, info.StatusLabel),
 			Color:       colorMap[info.Status],
-			Footer: &discordgo.MessageEmbedFooter{
-				Text: "Made with <3 by Sleeyax.",
-			},
+			Footer:      footer,
 			Fields: []*discordgo.MessageEmbedField{
 				&discordgo.MessageEmbedField{
 					Name:   "Players online",
@@ -173,12 +210,10 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 		})
 	case "help":
 		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-			URL:   "https://github.com/sleeyax/aternos-discord-bot/",
-			Title: "Available commands",
-			Color: 0x00ff00,
-			Footer: &discordgo.MessageEmbedFooter{
-				Text: "Made with <3 by Sleeyax.",
-			},
+			URL:    "https://github.com/sleeyax/aternos-discord-bot/",
+			Title:  "Available commands",
+			Color:  0x00ff00,
+			Footer: footer,
 			Fields: []*discordgo.MessageEmbedField{
 				&discordgo.MessageEmbedField{
 					Name:   "start",
@@ -208,7 +243,98 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 			},
 		})
 	case "start":
+		// Connect to the websocket server.
+		if _, err := ab.getWSS(); err != nil {
+			s.ChannelMessageSend(m.ChannelID, "**Failed to connect to WSS.**")
+			log.Println("failed to connect to WSS:", err)
+			break
+		}
+
+		s.ChannelMessageSend(m.ChannelID, "Starting the server, please wait...")
+
+		ctx, cancel := context.WithCancel(context.Background())
+
+		go func() {
+			defer func() {
+				cancel()
+				ab.wss.Close()
+				ab.wss = nil
+			}()
+
+			for {
+				msg := <-ab.wss.Message
+				switch msg.Type {
+				case "ready":
+					// Start the server if it wasn't started already.
+					if err := ab.api.StartServer(); err != nil {
+						if err == aternos.ServerAlreadyStartedError {
+							s.ChannelMessageSend(m.ChannelID, "Server already started! Use `!status` or `!info` to fetch the status.")
+							break
+						}
+
+						s.ChannelMessageSend(m.ChannelID, "**Failed to start server.**")
+						log.Println("failed to start server:", err)
+
+						return
+					}
+
+					// Start sending keep-alive requests in the background (until the server is offline, see below).
+					go ab.sendHeartBeats(ctx)
+				case "status":
+					var info aternos.ServerInfo
+					json.Unmarshal(msg.MessageBytes, &info)
+					ab.serverInfo = &info
+
+					if ab.serverInfo.Status == aternos.Online {
+						s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+							Title:       "Server is online",
+							Description: fmt.Sprintf("Join now! Only %d seconds left.", ab.serverInfo.Countdown),
+							Color:       colorMap[aternos.Online],
+							Footer:      footer,
+							Fields: []*discordgo.MessageEmbedField{
+								&discordgo.MessageEmbedField{
+									Name:   "Server address",
+									Value:  fmt.Sprintf("`%s:%d`", ab.serverInfo.Address, ab.serverInfo.Port),
+									Inline: true,
+								},
+								&discordgo.MessageEmbedField{
+									Name:   "Dyn IP",
+									Value:  fmt.Sprintf("`%s`", ab.serverInfo.DynIP),
+									Inline: true,
+								},
+							},
+						})
+					} else if ab.serverInfo.Status == aternos.Offline {
+						s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+							Title:       "Server is offline",
+							Description: "The server is currently offline.",
+							Color:       colorMap[aternos.Offline],
+							Footer:      footer,
+						})
+						return
+					}
+				}
+			}
+		}()
 	case "stop":
+		if _, err := ab.getWSS(); err != nil {
+			s.ChannelMessageSend(m.ChannelID, "**Failed to connect to WSS.**")
+			log.Println("failed to connect to WSS:", err)
+			break
+		}
+
+		if err := ab.api.StopServer(); err != nil {
+			if err == aternos.ServerAlreadyStoppedError {
+				s.ChannelMessageSend(m.ChannelID, "Server already stopped!")
+				break
+			}
+
+			s.ChannelMessageSend(m.ChannelID, "**Failed to stop server.**")
+			log.Println("failed to stop server manually:", err)
+			break
+		}
+
+		s.ChannelMessageSend(m.ChannelID, "Stopping the server, please wait...")
 	default:
 		s.ChannelMessageSend(m.ChannelID, "*Command not found. Type `!help` for instructions.*")
 	}
