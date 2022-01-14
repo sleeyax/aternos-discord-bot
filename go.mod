@@ -2,7 +2,10 @@ module aternos-discord-bot
 
 go 1.17
 
-require github.com/bwmarrin/discordgo v0.23.2
+require (
+	github.com/bwmarrin/discordgo v0.23.2
+	github.com/sleeyax/aternos-api v0.2.1
+)
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
@@ -16,7 +19,6 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/refraction-networking/utls v1.0.0 // indirect
-	github.com/sleeyax/aternos-api v0.0.1 // indirect
 	github.com/sleeyax/gotcha v0.0.2 // indirect
 	github.com/sleeyax/gotcha/adapters/fhttp v0.0.0-20211225143732-1ae0bde30de1 // indirect
 	github.com/useflyent/fhttp v0.0.0-20210801005649-f160dd923789 // indirect

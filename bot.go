@@ -158,7 +158,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 		}
 
 		if msg == "status" {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Server %s is currently **%s**.", info.Name, info.StatusLabel))
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Server '%s' is currently **%s**.", info.Name, info.StatusLabel))
 			break
 		} else if msg == "players" {
 			if len(info.PlayerList) == 0 {
@@ -257,11 +257,13 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 
 		s.ChannelMessageSend(m.ChannelID, "Starting the server, please wait...")
 
-		ctx, cancel := context.WithCancel(context.Background())
+		ctxHeartBeat, cancelHeartBeat := context.WithCancel(context.Background())
+		ctxConfirm, cancelConfirm := context.WithCancel(context.Background())
 
 		go func() {
 			defer func() {
-				cancel()
+				cancelHeartBeat()
+				cancelConfirm()
 				ab.wss.Close()
 				ab.wss = nil
 				log.Println("Background routines stopped & connections closed.")
@@ -279,32 +281,35 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 					}
 
 					// Start sending keep-alive requests in the background (until the server is offline, see below).
-					go ab.sendHeartBeats(ctx)
+					go ab.sendHeartBeats(ctxHeartBeat)
 				case "status":
 					var info aternos.ServerInfo
 					json.Unmarshal(msg.MessageBytes, &info)
 					ab.serverInfo = &info
 
-					if info.Status == aternos.Online && info.Countdown != 0 {
-						s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-							Title:       "Server is online",
-							Description: fmt.Sprintf("Join now! Only %d seconds left.", ab.serverInfo.Countdown),
-							Color:       colorMap[aternos.Online],
-							Footer:      footer,
-							Fields: []*discordgo.MessageEmbedField{
-								&discordgo.MessageEmbedField{
-									Name:   "Server address",
-									Value:  fmt.Sprintf("`%s:%d`", ab.serverInfo.Address, ab.serverInfo.Port),
-									Inline: true,
+					switch info.Status {
+					case aternos.Online:
+						if info.Countdown != 0 {
+							s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+								Title:       "Server is online",
+								Description: fmt.Sprintf("Join now! Only %d seconds left.", ab.serverInfo.Countdown),
+								Color:       colorMap[aternos.Online],
+								Footer:      footer,
+								Fields: []*discordgo.MessageEmbedField{
+									&discordgo.MessageEmbedField{
+										Name:   "Server address",
+										Value:  fmt.Sprintf("`%s:%d`", ab.serverInfo.Address, ab.serverInfo.Port),
+										Inline: true,
+									},
+									&discordgo.MessageEmbedField{
+										Name:   "Dyn IP",
+										Value:  fmt.Sprintf("`%s`", ab.serverInfo.DynIP),
+										Inline: true,
+									},
 								},
-								&discordgo.MessageEmbedField{
-									Name:   "Dyn IP",
-									Value:  fmt.Sprintf("`%s`", ab.serverInfo.DynIP),
-									Inline: true,
-								},
-							},
-						})
-					} else if info.Status == aternos.Offline {
+							})
+						}
+					case aternos.Offline:
 						s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 							Title:       "Server is offline",
 							Description: "The server is currently offline.",
@@ -312,6 +317,14 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 							Footer:      footer,
 						})
 						return
+					case aternos.Preparing: // stuck in queue (only happens when traffic is high)
+						if info.Queue.Position != 0 {
+							s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
+						} else {
+							go ab.api.ConfirmServer(ctxConfirm, 10*time.Second)
+						}
+					case aternos.Loading:
+						cancelConfirm()
 					}
 				}
 			}
