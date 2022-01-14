@@ -288,7 +288,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 
 					switch info.Status {
 					case aternos.Online:
-						if info.Countdown != 0 {
+						if info.StatusLabelClass == "online" && ab.serverInfo.StatusLabelClass != "online" {
 							s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 								Title:       "Server is online",
 								Description: fmt.Sprintf("Join now! Only %d seconds left.", info.Countdown),
@@ -317,7 +317,7 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 						})
 						return
 					case aternos.Preparing: // stuck in queue (only happens when traffic is high)
-						if info.StatusLabelClass == "queueing" && info.Queue.Status == "pending" {
+						if (info.StatusLabelClass == "queueing" && info.Queue.Status == "pending") && (ab.serverInfo.Queue.Status != "pending") {
 							s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
 							go ab.api.ConfirmServer(ctxConfirm, 10*time.Second)
 						}
