@@ -4,7 +4,6 @@ metadata:
   name: aternos-discord-bot
   labels:
     app: aternos-discord-bot
-  namespace: sleeyax-discord
 spec:
   replicas: 1
   selector:
