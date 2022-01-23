@@ -31,7 +31,7 @@ Install the binary, set the required environment variables & run the bot:
 $ go install github.com/sleeyax/aternos-discord-bot
 $ DISCORD_TOKEN="" ATERNOS_SESSION="" ATERNOS_SERVER="" aternos-discord-bot
 ```
-Alternatively you can also run the latest version from source:
+Alternatively you can also download the binary from [releases](https://github.com/sleeyax/aternos-discord-bot/releases) or run the latest version from source:
 ```
 $ git clone https://github.com/sleeyax/aternos-discord-bot.git
 $ cd aternos-discord-bot
