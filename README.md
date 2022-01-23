@@ -33,7 +33,7 @@ $ DISCORD_TOKEN="" ATERNOS_SESSION="" ATERNOS_SERVER="" aternos-discord-bot
 ```
 Alternatively you can also run the latest version from source:
 ```
-$ git clone https://github.com/sleeyax/aternos-discord-bot
+$ git clone https://github.com/sleeyax/aternos-discord-bot.git
 $ cd aternos-discord-bot
 $ DISCORD_TOKEN="" ATERNOS_SESSION="" ATERNOS_SERVER="" aternos-discord-bot go run ./cmd/main.go
 ```
