@@ -97,7 +97,7 @@ func (ab *AternosBot) getServerInfo() (*aternos.ServerInfo, error) {
 
 // getWSS connects to the Aternos websocket server and stores the active connection in memory for later use.
 func (ab *AternosBot) getWSS() (*aternos.Websocket, error) {
-	if ab.wss == nil {
+	if ab.wss == nil || !ab.wss.IsConnected() {
 		wss, err := ab.api.ConnectWebSocket()
 		if err != nil {
 			return nil, err

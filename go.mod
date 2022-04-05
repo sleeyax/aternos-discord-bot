@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/bwmarrin/discordgo v0.23.2
-	github.com/sleeyax/aternos-api v0.2.1
+	github.com/sleeyax/aternos-api v0.3.0
 )
 
 require (

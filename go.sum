@@ -28,8 +28,8 @@ github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfn
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
-github.com/sleeyax/aternos-api v0.2.1 h1:ImkzuX/OZb64GDipHAiEHTY12E3TeZOJ9EGvSGs+Hkc=
-github.com/sleeyax/aternos-api v0.2.1/go.mod h1:+EI25UT/xG/cfiUsTNFTVL/UOmWqdczf9vOZEoogUkI=
+github.com/sleeyax/aternos-api v0.3.0 h1:SWPDt56j4qGkGnYnadLg0v13XS5Srg2iNWwPR87q9wM=
+github.com/sleeyax/aternos-api v0.3.0/go.mod h1:+EI25UT/xG/cfiUsTNFTVL/UOmWqdczf9vOZEoogUkI=
 github.com/sleeyax/gotcha v0.0.2 h1:eiCFjEa4nwl/eZ7etBswDKPQ0bUp8YPbuicCHJtD68I=
 github.com/sleeyax/gotcha v0.0.2/go.mod h1:H2TKsKYJIXgmFGGUqs21FCr1HXVXjNWccX5/WexkLOM=
 github.com/sleeyax/gotcha/adapters/fhttp v0.0.0-20211225143732-1ae0bde30de1 h1:qlengZ6XaJeHZl4AgIOvcGMs4r75V6DFuP+7zjgQzo0=
