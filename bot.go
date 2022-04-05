@@ -270,7 +270,18 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 			}()
 
 			for {
-				msg := <-ab.wss.Message
+				msg, ok := <-ab.wss.Message
+
+				// if the msg channel is closed it means the server unsuspectedly closed the connection, so we should try to reconnect at least once.
+				if !ok {
+					log.Println("Failed to read message. Tying to reconnect...")
+					if _, err := ab.getWSS(); err != nil {
+						s.ChannelMessageSend(m.ChannelID, "**Failed to reconnect to WSS.**")
+						log.Println("failed to reconnect to WSS:", err)
+						break
+					}
+				}
+
 				switch msg.Type {
 				case "ready":
 					// Start the server.
