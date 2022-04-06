@@ -28,20 +28,14 @@ func main() {
 		ServerCookie:  server,
 	}
 
-	// Try to connect to mongo db database
 	if mongoDbUri != "" {
-		db := database.New(mongoDbUri)
-		if err := db.Connect(); err != nil {
-			log.Fatalln(fmt.Sprintf("Failed to connect to Mongo DB: %e", err))
-		}
-		bot.Database = db
+		bot.Database = database.New(mongoDbUri)
 	}
 
 	if err := bot.Start(); err != nil {
 		log.Fatalln(err)
 	}
 	defer bot.Stop()
-	defer bot.Database.Disconnect()
 
 	// Wait until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")

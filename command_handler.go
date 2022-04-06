@@ -2,16 +2,9 @@ package aternos_discord_bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/sleeyax/aternos-discord-bot/database/models"
+	"log"
 )
-
-func respondWithText(s *discordgo.Session, i *discordgo.InteractionCreate, content string) error {
-	return s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: content,
-		},
-	})
-}
 
 // handleCommands responds to incoming interactive commands on discord.
 func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -19,8 +12,26 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 
 	switch command.Name {
 	case PingCommand:
-		respondWithText(s, i, "Pong!")
+		respondWithText(s, i, formatMessage("Pong!", normal))
+	case ConfigureCommand:
+		if ab.Database == nil {
+			respondWithText(s, i, formatMessage("Command unavailable (no database configured).", danger))
+			return
+		}
+
+		err := ab.Database.SaveServerSettings(&models.ServerSettings{
+			GuildID:       i.GuildID,
+			SessionCookie: "test", // TODO: store actual cookies
+			ServerCookie:  "test",
+		})
+		if err != nil {
+			log.Println(err)
+			respondWithText(s, i, formatMessage("Failed to save configuration.", danger))
+			return
+		}
+
+		respondWithText(s, i, formatMessage("Configuration changed successfully.", success))
 	default:
-		respondWithText(s, i, "**Unknown command!**")
+		respondWithText(s, i, formatMessage("**Unknown command!**", danger))
 	}
 }

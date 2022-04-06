@@ -1,6 +1,7 @@
 package aternos_discord_bot
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
 	"log"
@@ -49,6 +50,12 @@ func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete)
 }
 
 func (ab *Bot) Start() error {
+	if ab.Database != nil {
+		if err := ab.Database.Connect(); err != nil {
+			return fmt.Errorf("failed to connect to database: %e", err)
+		}
+	}
+
 	session, err := discordgo.New("Bot " + ab.DiscordToken)
 	if err != nil {
 		return err
@@ -61,7 +68,40 @@ func (ab *Bot) Start() error {
 }
 
 func (ab *Bot) Stop() error {
+	if ab.Database != nil {
+		if err := ab.Database.Disconnect(); err != nil {
+			return fmt.Errorf("failed to disconnect database: %e", err)
+		}
+	}
 	return ab.discord.Close()
+}
+
+// registerCommands registers all available Discord commands.
+func (ab *Bot) registerCommands() error {
+	ab.registeredCommands = make([]*discordgo.ApplicationCommand, len(commands))
+
+	for i, v := range commands {
+		cmd, err := ab.discord.ApplicationCommandCreate(ab.discord.State.User.ID, "", v)
+		if err != nil {
+			return err
+		}
+		ab.registeredCommands[i] = cmd
+	}
+
+	return nil
+}
+
+// removeCommands removes all Discord commands that were previously registered using registerCommands.
+func (ab *Bot) removeCommands() error {
+	for _, v := range ab.registeredCommands {
+		if err := ab.discord.ApplicationCommandDelete(ab.discord.State.User.ID, "", v.ID); err != nil {
+			return err
+		}
+	}
+
+	ab.registeredCommands = nil
+
+	return nil
 }
 
 // Called whenever a message is created on any channel that the authenticated bot has access to.

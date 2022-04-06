@@ -1,7 +1,10 @@
 package database
 
+import "github.com/sleeyax/aternos-discord-bot/database/models"
+
 type Database interface {
 	Connect() error
 	Disconnect() error
-	ListDatabases() ([]string, error) // TODO: remove this
+	GetServerSettings() ([]models.ServerSettings, error)
+	SaveServerSettings(settings *models.ServerSettings) error
 }
