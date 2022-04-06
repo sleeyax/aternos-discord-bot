@@ -1,8 +1,8 @@
 package main
 
 import (
-	discordBot "aternos-discord-bot"
 	"fmt"
+	discordBot "github.com/sleeyax/aternos-discord-bot"
 	"log"
 	"os"
 	"os/signal"

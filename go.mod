@@ -1,4 +1,4 @@
-module aternos-discord-bot
+module github.com/sleeyax/aternos-discord-bot
 
 go 1.17
 
