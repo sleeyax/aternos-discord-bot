@@ -43,6 +43,13 @@ You can also run the bot in a docker container:
 
 `docker run -d --name aternos-discord-bot -e DISCORD_TOKEN="" -e ATERNOS_SESSION="" -e ATERNOS_SERVER="" sleeyax/aternos-discord-bot`
 
+#### Docker compose
+You can use docker compose to spin up a local database (recommended for development):
+
+`docker-compose up -d`
+
+You should now be able to access the Mongo express UI on http://127.0.0.1:7070/.
+
 ### Kubernetes
 Deployment to a kubernetes cluster is also supported. 
 

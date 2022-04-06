@@ -3,6 +3,7 @@ package aternos_discord_bot
 import (
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
+	"github.com/sleeyax/aternos-discord-bot/database"
 )
 
 type Connection struct {
@@ -21,11 +22,11 @@ type Connection struct {
 }
 
 type Bot struct {
-	// Optional MongoDB database to connect to.
+	// Database instance that implements the database.Database interface.
 	//
 	// If this is set it means the bot is operating on behalf of multiple discord servers.
 	// Otherwise, it's only configured for one; in that case SessionCookie and ServerCookie should be set.
-	MongoDbURI string
+	Database database.Database
 
 	// Discord bot token.
 	DiscordToken string
@@ -36,10 +37,11 @@ type Bot struct {
 	// Aternos server cookie (ATERNOS_SERVER).
 	ServerCookie string
 
-	// Current discord session.
+	// Current discord bot session.
 	discord *discordgo.Session
 
 	// Aternos api instance.
+	// TODO: remove
 	api *aternos.Api
 
 	// List of active connections for each discord server.
