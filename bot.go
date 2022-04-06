@@ -1,50 +1,14 @@
 package aternos_discord_bot
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
 	"log"
 	"net/http"
-	"strings"
-	"time"
 )
 
-type AternosBot struct {
-	// Command prefix.
-	// Defaults to "!".
-	Prefix string
-
-	// Discord bot token.
-	DiscordToken string
-
-	// Aternos discord cookie (ATERNOS_SESSION).
-	SessionCookie string
-
-	// Aternos server cookie (ATERNOS_SERVER).
-	ServerCookie string
-
-	// Current discord session.
-	discord *discordgo.Session
-
-	// Aternos api instance.
-	api *aternos.Api
-
-	// Current server status.
-	// This is basically only used as a cache for the info command.
-	serverInfo *aternos.ServerInfo
-
-	// Current active websocket connection.
-	wss *aternos.Websocket
-}
-
-func (ab *AternosBot) setup() {
-	if ab.Prefix == "" {
-		ab.Prefix = "!"
-	}
-
+func (ab *Bot) setupHandlers() {
+	// TODO: move api
 	ab.api = aternos.New(&aternos.Options{
 		Cookies: []*http.Cookie{
 			{
@@ -61,80 +25,54 @@ func (ab *AternosBot) setup() {
 			},
 		},
 	})
-	ab.discord.Identify.Intents = discordgo.IntentsGuildMessages
-	ab.discord.AddHandler(ab.readMessages)
+	ab.discord.AddHandler(ab.handleCommands)
+	ab.discord.AddHandler(ab.handleJoinServer)
+	ab.discord.AddHandler(ab.handleLeaveServer)
 }
 
-func (ab *AternosBot) Start() error {
-	var err error
-	ab.discord, err = discordgo.New("Bot " + ab.DiscordToken)
+func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) {
+	log.Printf("Joined server %s (ID: %s)", e.Name, e.ID)
+	if err := ab.registerCommands(); err != nil {
+		log.Panicf("Failed to register commands: %e\n", err)
+	}
+}
+
+func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete) {
+	log.Printf("Left server %s (ID: %s)", e.Name, e.ID)
+	if err := ab.removeCommands(); err != nil {
+		log.Panicf("Failed to remove commands: %e\n", err)
+	}
+}
+
+func (ab *Bot) Start() error {
+	session, err := discordgo.New("Bot " + ab.DiscordToken)
 	if err != nil {
 		return err
 	}
 
-	ab.setup()
+	ab.discord = session
+	ab.setupHandlers()
 
 	return ab.discord.Open()
 }
 
-func (ab *AternosBot) Stop() error {
+func (ab *Bot) Stop() error {
 	return ab.discord.Close()
 }
 
-// getServerInfo returns the current server info.
-// If the status is not known yet, it wil be (re)fetched and cached in memory.
-func (ab *AternosBot) getServerInfo() (*aternos.ServerInfo, error) {
-	if ab.serverInfo == nil {
-		info, err := ab.api.GetServerInfo()
-		if err != nil {
-			return nil, err
-		}
-		ab.serverInfo = &info
-	}
-
-	return ab.serverInfo, nil
-}
-
-// getWSS connects to the Aternos websocket server and stores the active connection in memory for later use.
-func (ab *AternosBot) getWSS() (*aternos.Websocket, error) {
-	if ab.wss == nil || !ab.wss.IsConnected() {
-		wss, err := ab.api.ConnectWebSocket()
-		if err != nil {
-			return nil, err
-		}
-		ab.wss = wss
-	}
-
-	return ab.wss, nil
-}
-
-func (ab *AternosBot) sendHeartBeats(context context.Context) {
-	ticker := time.NewTicker(time.Millisecond * 49000)
-
-	for {
-		select {
-		case <-context.Done():
-			ticker.Stop()
-			return
-		case <-ticker.C:
-			ab.wss.SendHeartBeat()
-		}
-	}
-}
-
 // Called whenever a message is created on any channel that the authenticated bot has access to.
-func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
+/*func (ab *Bot) readMessages(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
 	// Ignore if message doesn't start with prefix.
-	if !strings.HasPrefix(m.Content, ab.Prefix) {
+	if !strings.HasPrefix(m.Content, "!") {
 		return
 	}
 
-	msg := strings.TrimLeft(m.Content, ab.Prefix)
+	msg := strings.TrimLeft(m.Content, "!")
 
 	footer := &discordgo.MessageEmbedFooter{
 		Text: "Made with <3 by Sleeyax.",
@@ -363,4 +301,4 @@ func (ab *AternosBot) readMessages(s *discordgo.Session, m *discordgo.MessageCre
 	default:
 		s.ChannelMessageSend(m.ChannelID, "*Command not found. Type `!help` for instructions.*")
 	}
-}
+}*/

@@ -20,8 +20,7 @@ func main() {
 	}
 
 	// Create discord bot instance.
-	bot := discordBot.AternosBot{
-		Prefix:        "!",
+	bot := discordBot.Bot{
 		DiscordToken:  token,
 		SessionCookie: session,
 		ServerCookie:  server,
