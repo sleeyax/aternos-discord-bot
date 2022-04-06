@@ -10,7 +10,8 @@ const (
 	StatusCommand    = "status"
 	InfoCommand      = "status"
 	PlayersCommand   = "players"
-	CookiesOption    = "cookies"
+	SessionOption    = "session"
+	ServerOption     = "server"
 )
 
 // List of available discord commands.
@@ -18,13 +19,22 @@ var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        ConfigureCommand,
 		Description: "Save configuration settings",
-		Options: []*discordgo.ApplicationCommandOption{{
-			Name:         CookiesOption,
-			Description:  "Set the authentication cookies",
-			Type:         discordgo.ApplicationCommandOptionString,
-			Required:     true,
-			ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
-		}},
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Name:         SessionOption,
+				Description:  "Set the ATERNOS_SESSION cookie value",
+				Type:         discordgo.ApplicationCommandOptionString,
+				Required:     true,
+				ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
+			},
+			{
+				Name:         ServerOption,
+				Description:  "Set the ATERNOS_SERVER cookie value",
+				Type:         discordgo.ApplicationCommandOptionString,
+				Required:     true,
+				ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
+			},
+		},
 	},
 	{
 		Name:        StartCommand,

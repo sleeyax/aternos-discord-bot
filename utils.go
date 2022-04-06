@@ -10,3 +10,13 @@ func respondWithText(s *discordgo.Session, i *discordgo.InteractionCreate, conte
 		},
 	})
 }
+
+func optionsToMap(options []*discordgo.ApplicationCommandInteractionDataOption) map[string]*discordgo.ApplicationCommandInteractionDataOption {
+	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+
+	for _, opt := range options {
+		optionMap[opt.Name] = opt
+	}
+
+	return optionMap
+}

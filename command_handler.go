@@ -19,10 +19,12 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 			return
 		}
 
+		options := optionsToMap(command.Options)
+
 		err := ab.Database.SaveServerSettings(&models.ServerSettings{
 			GuildID:       i.GuildID,
-			SessionCookie: "test", // TODO: store actual cookies
-			ServerCookie:  "test",
+			SessionCookie: options[SessionOption].StringValue(),
+			ServerCookie:  options[ServerOption].StringValue(),
 		})
 		if err != nil {
 			log.Println(err)

@@ -35,17 +35,20 @@ func (ab *Bot) setupHandlers() {
 func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) {
 	// The GuildCreate event also fires after the bot has been restarted, so we have to check whether we joined recently or not.
 	if time.Now().Sub(e.JoinedAt).Minutes() <= 2 {
-		log.Printf("Joined new server %s (ID: %s)", e.Name, e.ID)
+		log.Printf("Joined new server %s (ID: %s)\n", e.Name, e.ID)
+		// We don't really need to exit the application in case the commands fail to register.
+		// In case it happens users just won't see any commands and will hopefully file an issue.
+		// Also, this won't crash our app in case of a discord outage.
 		if err := ab.registerCommands(); err != nil {
-			log.Panicf("Failed to register commands: %e\n", err)
+			log.Printf("Failed to register commands: %e\n", err)
 		}
 	}
 }
 
 func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete) {
-	log.Printf("Left server %s (ID: %s)", e.Name, e.ID)
+	log.Printf("Left server %s (ID: %s)\n", e.Guild.Name, e.ID)
 	if err := ab.removeCommands(); err != nil {
-		log.Panicf("Failed to remove commands: %e\n", err)
+		log.Printf("Failed to remove commands: %e\n", err)
 	}
 }
 
