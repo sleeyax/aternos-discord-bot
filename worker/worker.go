@@ -13,6 +13,10 @@ func New(id string, options *aternos.Options) *Worker {
 	return &Worker{id: id, api: aternos.New(options)}
 }
 
+func (w *Worker) log(msg string) {
+	log.Printf("worker %s: %s\n", w.id, msg)
+}
+
 // Reconfigure reconfigures the worker with given options.
 func (w *Worker) Reconfigure(options *aternos.Options) {
 	// TODO: check performance of this call
@@ -48,14 +52,14 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 		w.wss.Close()
 		w.wss = nil
 		// TODO: log worker number (based on discord id?)
-		log.Printf("worker %s: Background routines stopped & connections closed.\n", w.id)
+		w.log("Background routines stopped & connections closed")
 	}()
 
 	for {
 		select {
 		case msg, ok := <-w.wss.Message:
 			if !ok {
-				log.Printf("worker %s: Message channel closed. Tying to reconnect...\n", w.id)
+				w.log("Message channel closed. Tying to reconnect...")
 				w.Init()
 			}
 
