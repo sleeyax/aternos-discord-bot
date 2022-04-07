@@ -37,8 +37,6 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 			break
 		}
 
-		ab.deleteWorker(i.GuildID)
-
 		respondWithText(s, i, formatMessage("Configuration changed successfully.", success))
 	case StatusCommand:
 		fallthrough
@@ -56,8 +54,6 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		if err != nil {
 			if err == aternos.UnauthenticatedError {
 				respondWithText(s, i, formatMessage("Invalid credentials. Use `/configure` to reconfigure the bot.", danger))
-				// delete the worker from the pool, so we can re-create it once the next discord command is received (hopefully with valid credentials, then)
-				ab.deleteWorker(i.GuildID)
 			} else {
 				log.Printf("failed to get server info: %s", err)
 				respondWithText(s, i, formatMessage("Failed to get server info", danger))

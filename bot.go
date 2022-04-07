@@ -25,6 +25,8 @@ func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) 
 		// Also, this won't crash our app in case of a message outage.
 		if err := ab.registerCommands(); err != nil {
 			log.Printf("Failed to register commands: %e\n", err)
+		} else {
+			log.Println("Commands registered successfully.")
 		}
 	}
 }
@@ -33,6 +35,8 @@ func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete)
 	log.Printf("Left server %s (ID: %s)\n", e.Guild.Name, e.ID)
 	if err := ab.removeCommands(); err != nil {
 		log.Printf("Failed to remove commands: %e\n", err)
+	} else {
+		log.Println("Removed commands successfully.")
 	}
 }
 
@@ -96,23 +100,19 @@ func (ab *Bot) removeCommands() error {
 func (ab *Bot) getWorker(guildId string) (*worker.Worker, error) {
 	w, ok := ab.workers[guildId]
 
+	opts, err := ab.createOptions(guildId)
+	if err != nil {
+		return nil, err
+	}
+
 	if !ok {
-		opts, err := ab.createOptions(guildId)
-		if err != nil {
-			return nil, err
-		}
-
-		w = worker.New(aternos.New(opts))
-
+		w = worker.New(opts)
 		ab.workers[guildId] = w
+	} else {
+		w.Reconfigure(opts)
 	}
 
 	return w, nil
-}
-
-// deleteWorker removes the current worker for the specified guildId from the pool.
-func (ab *Bot) deleteWorker(guildId string) {
-	delete(ab.workers, guildId)
 }
 
 // createOptions creates new aternos configuration options.

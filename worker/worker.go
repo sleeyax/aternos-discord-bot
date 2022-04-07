@@ -7,8 +7,13 @@ import (
 )
 
 // New creates a new Worker instance.
-func New(api *aternos.Api) *Worker {
-	return &Worker{api: api}
+func New(options *aternos.Options) *Worker {
+	return &Worker{api: aternos.New(options)}
+}
+
+func (w *Worker) Reconfigure(options *aternos.Options) {
+	// TODO: check performance of this call
+	w.api = aternos.New(options)
 }
 
 func (w *Worker) Start() error {
