@@ -13,7 +13,7 @@ func New(id string, options *aternos.Options) *Worker {
 	return &Worker{id: id, api: aternos.New(options)}
 }
 
-func (w *Worker) log(msg string) {
+func (w *Worker) Log(msg string) {
 	log.Printf("worker %s: %s\n", w.id, msg)
 }
 
@@ -51,15 +51,14 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 		cancelConfirm()
 		w.wss.Close()
 		w.wss = nil
-		// TODO: log worker number (based on discord id?)
-		w.log("Background routines stopped & connections closed")
+		w.Log("Background routines stopped & connections closed")
 	}()
 
 	for {
 		select {
 		case msg, ok := <-w.wss.Message:
 			if !ok {
-				w.log("Message channel closed. Tying to reconnect...")
+				w.Log("Message channel closed. Tying to reconnect...")
 				w.Init()
 			}
 

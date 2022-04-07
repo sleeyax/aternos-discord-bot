@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
+	"github.com/sleeyax/aternos-discord-bot/database"
 	"github.com/sleeyax/aternos-discord-bot/database/models"
 	"github.com/sleeyax/aternos-discord-bot/message"
 	"strings"
@@ -60,7 +61,11 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 	case StopCommand:
 		w, err := ab.getWorker(i.GuildID)
 		if err != nil {
-			sendErrorText("Failed to get worker", err)
+			if err == database.ErrDataNotFound {
+				sendText(message.FormatWarning("Bot setup incomplete. Use `/configure` to configure the bot."))
+			} else {
+				sendErrorText("Failed to get worker", err)
+			}
 			break
 		}
 
@@ -108,7 +113,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 
 				// TODO: check if we need to put stop() in a goroutine for better performance
 				if err = w.Stop(); err != nil {
-					sendText(message.FormatError("Failed to stop the server"))
+					s.ChannelMessageSend(i.ChannelID, message.FormatError("Failed to stop the server"))
+					w.Log(err.Error())
 				}
 
 				break
@@ -129,7 +135,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 				case "ready":
 					if command.Name == StartCommand {
 						if err = w.Start(); err != nil {
-							sendErrorText("Failed to start! Ask an admin to reconfigure the bot and try again. See `/help` if the problem persists.", err)
+							s.ChannelMessageSend(i.ChannelID, message.FormatError("Failed to start! Reconfigure the bot with `/configure` and try again. See `/help` if the problem persists."))
+							w.Log(err.Error())
 							cancel() // cancel the worker's goroutine
 							break
 						}
@@ -142,7 +149,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 						notification, _ := message.CreateServerStatusNotificationEmbed(info)
 						s.ChannelMessageSendEmbed(i.ChannelID, notification)
 					case aternos.Preparing:
-						sendText(message.FormatInfo("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
+						s.ChannelMessageSend(i.ChannelID, message.FormatInfo("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
+						w.Log("Waiting in queue...")
 					}
 				}
 			})
