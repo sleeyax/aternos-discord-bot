@@ -25,6 +25,7 @@ func formatMessage(text string, messageType MessageType) string {
 	case loading:
 		b.WriteString(":hourglass: ")
 	case normal:
+		fallthrough
 	default:
 		break
 	}
