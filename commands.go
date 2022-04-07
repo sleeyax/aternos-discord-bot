@@ -8,7 +8,7 @@ const (
 	StartCommand     = "start"
 	StopCommand      = "stop"
 	StatusCommand    = "status"
-	InfoCommand      = "status"
+	InfoCommand      = "info"
 	PlayersCommand   = "players"
 	SessionOption    = "session"
 	ServerOption     = "server"

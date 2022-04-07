@@ -2,24 +2,9 @@ package aternos_discord_bot
 
 import (
 	"github.com/bwmarrin/discordgo"
-	aternos "github.com/sleeyax/aternos-api"
 	"github.com/sleeyax/aternos-discord-bot/database"
+	"github.com/sleeyax/aternos-discord-bot/worker"
 )
-
-type Connection struct {
-	// Discord guild id.
-	guildId string
-
-	// Current server status.
-	// This is basically only used as a cache for the info command.
-	serverInfo *aternos.ServerInfo
-
-	// Current active websocket connection.
-	wss *aternos.Websocket
-
-	// Aternos API instance.
-	api *aternos.Api
-}
 
 type Bot struct {
 	// Database instance that implements the database.Database interface.
@@ -40,8 +25,8 @@ type Bot struct {
 	// Current discord bot session.
 	discord *discordgo.Session
 
-	// List of active connections for each discord server.
-	connections []*Connection
+	// Map of active workers for each discord server.
+	workers worker.WorkersMap
 
 	// List of registered discord commands.
 	// These can be used to delete them once the bot has been stopped or removed from the discord server.

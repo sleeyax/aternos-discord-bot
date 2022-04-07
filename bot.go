@@ -3,7 +3,10 @@ package aternos_discord_bot
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	aternos "github.com/sleeyax/aternos-api"
+	"github.com/sleeyax/aternos-discord-bot/worker"
 	"log"
+	"net/http"
 	"time"
 )
 
@@ -19,7 +22,7 @@ func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) 
 		log.Printf("Joined new server %s (ID: %s)\n", e.Name, e.ID)
 		// We don't really need to exit the application in case the commands fail to register.
 		// In case it happens users just won't see any commands and will hopefully file an issue.
-		// Also, this won't crash our app in case of a discord outage.
+		// Also, this won't crash our app in case of a message outage.
 		if err := ab.registerCommands(); err != nil {
 			log.Printf("Failed to register commands: %e\n", err)
 		}
@@ -39,6 +42,7 @@ func (ab *Bot) Start() error {
 			return fmt.Errorf("failed to connect to database: %e", err)
 		}
 	}
+	ab.workers = make(map[string]*worker.Worker)
 
 	session, err := discordgo.New("Bot " + ab.DiscordToken)
 	if err != nil {
@@ -86,6 +90,72 @@ func (ab *Bot) removeCommands() error {
 	ab.registeredCommands = nil
 
 	return nil
+}
+
+// getWorker returns the active worker for the specified guildId from the pool or creates a new one if it doesn't exist yet.
+func (ab *Bot) getWorker(guildId string) (*worker.Worker, error) {
+	w, ok := ab.workers[guildId]
+
+	if !ok {
+		opts, err := ab.createOptions(guildId)
+		if err != nil {
+			return nil, err
+		}
+
+		w = worker.New(aternos.New(opts))
+
+		ab.workers[guildId] = w
+	}
+
+	return w, nil
+}
+
+// deleteWorker removes the current worker for the specified guildId from the pool.
+func (ab *Bot) deleteWorker(guildId string) {
+	delete(ab.workers, guildId)
+}
+
+// createOptions creates new aternos configuration options.
+func (ab *Bot) createOptions(guildId string) (*aternos.Options, error) {
+	options := &aternos.Options{
+		Cookies: []*http.Cookie{
+			{
+				Name:  "ATERNOS_LANGUAGE",
+				Value: "en",
+			},
+		},
+	}
+
+	if ab.Database != nil {
+		settings, err := ab.Database.GetServerSettings(guildId)
+		if err != nil {
+			return nil, err
+		}
+
+		options.Cookies = append(options.Cookies,
+			&http.Cookie{
+				Name:  "ATERNOS_SESSION",
+				Value: settings.SessionCookie,
+			},
+			&http.Cookie{
+				Name:  "ATERNOS_SERVER",
+				Value: settings.ServerCookie,
+			},
+		)
+	} else {
+		options.Cookies = append(options.Cookies,
+			&http.Cookie{
+				Name:  "ATERNOS_SESSION",
+				Value: ab.SessionCookie,
+			},
+			&http.Cookie{
+				Name:  "ATERNOS_SERVER",
+				Value: ab.ServerCookie,
+			},
+		)
+	}
+
+	return options, nil
 }
 
 // Called whenever a message is created on any channel that the authenticated bot has access to.

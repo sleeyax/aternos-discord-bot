@@ -4,23 +4,24 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
-	"github.com/sleeyax/aternos-discord-bot/database"
 	"github.com/sleeyax/aternos-discord-bot/database/models"
 	"log"
-	"net/http"
+	"strings"
 )
 
 // handleCommands responds to incoming interactive commands on discord.
 func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	command := i.ApplicationCommandData()
 
+	// TODO: improve error handling
+
 	switch command.Name {
 	case PingCommand:
 		respondWithText(s, i, formatMessage("Pong!", normal))
 	case ConfigureCommand:
 		if ab.Database == nil {
-			respondWithText(s, i, formatMessage("Command unavailable (no database configured).", danger))
-			return
+			respondWithText(s, i, formatMessage("Command unavailable (no database configured).", warning))
+			break
 		}
 
 		options := optionsToMap(command.Options)
@@ -31,76 +32,53 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 			ServerCookie:  options[ServerOption].StringValue(),
 		})
 		if err != nil {
-			log.Println(err)
+			log.Printf("failed to save configuration: %e", err)
 			respondWithText(s, i, formatMessage("Failed to save configuration.", danger))
-			return
+			break
 		}
+
+		ab.deleteWorker(i.GuildID)
 
 		respondWithText(s, i, formatMessage("Configuration changed successfully.", success))
-	case StartCommand:
-		options, err := ab.createOptions(i.GuildID)
-
+	case StatusCommand:
+		fallthrough
+	case InfoCommand:
+		fallthrough
+	case PlayersCommand:
+		w, err := ab.getWorker(i.GuildID)
 		if err != nil {
-			if err == database.ErrDataNotFound {
-				respondWithText(s, i, formatMessage("Server settings not found. Use `/configure` to get started.", warning))
-				return
+			log.Printf("failed to get worker: %e", err)
+			respondWithText(s, i, formatMessage("Failed to get worker", danger))
+			break
+		}
+
+		serverInfo, err := w.GetServerInfo()
+		if err != nil {
+			if err == aternos.UnauthenticatedError {
+				respondWithText(s, i, formatMessage("Invalid credentials. Use `/configure` to reconfigure the bot.", danger))
+				// delete the worker from the pool, so we can re-create it once the next discord command is received (hopefully with valid credentials, then)
+				ab.deleteWorker(i.GuildID)
+			} else {
+				log.Printf("failed to get server info: %s", err)
+				respondWithText(s, i, formatMessage("Failed to get server info", danger))
 			}
-
-			log.Printf("failed to get server settings %e", err)
-			respondWithText(s, i, formatMessage("Failed to get server settings", danger))
-			return
+			break
 		}
 
-		connection := &Connection{
-			guildId: i.GuildID,
-			api:     aternos.New(options),
+		switch command.Name {
+		case StatusCommand:
+			// s.ChannelMessageSendEmbed(i.ChannelID, message.CreateServerInfoEmbed(serverInfo))
+			break
+		case InfoCommand:
+			respondWithText(s, i, formatMessage(fmt.Sprintf("Server '%s' is currently **%s**.", serverInfo.Name, serverInfo.StatusLabel), info))
+		case PlayersCommand:
+			if len(serverInfo.PlayerList) == 0 {
+				respondWithText(s, i, formatMessage("No one is playing right now :(", info))
+			} else {
+				respondWithText(s, i, formatMessage(fmt.Sprintf("Active players: %s.", strings.Join(serverInfo.PlayerList, ", ")), info))
+			}
 		}
-
-		respondWithText(s, i, formatMessage(fmt.Sprintf("Created options for %s", connection.guildId), success))
 	default:
 		respondWithText(s, i, formatMessage("**Unknown command!**", danger))
 	}
-}
-
-// createOptions creates new aternos configuration options.
-func (ab *Bot) createOptions(guildId string) (*aternos.Options, error) {
-	options := &aternos.Options{
-		Cookies: []*http.Cookie{
-			{
-				Name:  "ATERNOS_LANGUAGE",
-				Value: "en",
-			},
-		},
-	}
-
-	if ab.Database != nil {
-		settings, err := ab.Database.GetServerSettings(guildId)
-		if err != nil {
-			return nil, err
-		}
-
-		options.Cookies = append(options.Cookies,
-			&http.Cookie{
-				Name:  "ATERNOS_SESSION",
-				Value: settings.SessionCookie,
-			},
-			&http.Cookie{
-				Name:  "ATERNOS_SERVER",
-				Value: settings.ServerCookie,
-			},
-		)
-	} else {
-		options.Cookies = append(options.Cookies,
-			&http.Cookie{
-				Name:  "ATERNOS_SESSION",
-				Value: ab.SessionCookie,
-			},
-			&http.Cookie{
-				Name:  "ATERNOS_SERVER",
-				Value: ab.ServerCookie,
-			},
-		)
-	}
-
-	return options, nil
 }

@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	// TODO: cobra CLI?
+
 	// Read configuration settings from environment variables
 	token := os.Getenv("DISCORD_TOKEN")
 	session := os.Getenv("ATERNOS_SESSION")

@@ -7,9 +7,10 @@ type MessageType int
 const (
 	success MessageType = iota
 	warning
+	info
 	danger
-	normal
 	loading
+	normal
 )
 
 func formatMessage(text string, messageType MessageType) string {
@@ -20,6 +21,8 @@ func formatMessage(text string, messageType MessageType) string {
 		b.WriteString(":white_check_mark: ")
 	case warning:
 		b.WriteString(":warning: ")
+	case info:
+		b.WriteString(":information_source: ")
 	case danger:
 		b.WriteString(":x: ")
 	case loading:
