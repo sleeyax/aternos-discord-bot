@@ -12,8 +12,12 @@ import (
 func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	command := i.ApplicationCommandData()
 
+	// wrap functions around our utilities to make life easier
 	sendText := func(content string) {
 		respondWithText(s, i, content)
+	}
+	sendHiddenText := func(content string) {
+		respondWithHiddenText(s, i, content)
 	}
 	sendErrorText := func(content string, err error) {
 		respondWithError(s, i, content, err)
@@ -21,7 +25,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 
 	switch command.Name {
 	case PingCommand:
-		sendText(message.FormatDefault("Pong!"))
+		sendHiddenText(message.FormatDefault("Pong!"))
+	// TODO: only allow admin account to reconfigure
 	case ConfigureCommand:
 		if ab.Database == nil {
 			sendText(message.FormatWarning("Command unavailable (no database configured)."))
@@ -56,24 +61,28 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		if err != nil {
 			if err == aternos.UnauthenticatedError {
 				sendText(message.FormatError("Invalid credentials. Use `/configure` to reconfigure the bot."))
-			} else {
-				sendErrorText("Failed to get server info", err)
+				break
 			}
+
+			sendErrorText("Failed to get server info", err)
+
 			break
 		}
 
 		switch command.Name {
-		case StatusCommand:
-			// s.ChannelMessageSendEmbed(i.ChannelID, message.CreateServerInfoEmbed(serverInfo))
-			break
 		case InfoCommand:
+			respondWithEmbeds(s, i, []*discordgo.MessageEmbed{
+				message.CreateServerInfoEmbed(serverInfo),
+			})
+		case StatusCommand:
 			sendText(message.FormatInfo("Server '%s' is currently **%s**.", serverInfo.Name, serverInfo.StatusLabel))
 		case PlayersCommand:
 			if len(serverInfo.PlayerList) == 0 {
 				sendText(message.FormatInfo("No players online right now."))
-			} else {
-				sendText(message.FormatInfo("Active players: %s.", strings.Join(serverInfo.PlayerList, ", ")))
+				break
 			}
+
+			sendText(message.FormatInfo("Active players: %s.", strings.Join(serverInfo.PlayerList, ", ")))
 		}
 	default:
 		sendText(message.FormatWarning("Command unavailable. Please try again later or refresh your discord client `CTRL + R`"))

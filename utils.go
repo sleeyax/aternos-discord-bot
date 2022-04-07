@@ -6,12 +6,29 @@ import (
 	"log"
 )
 
-func respondWithText(s *discordgo.Session, i *discordgo.InteractionCreate, content string) error {
+func respond(s *discordgo.Session, i *discordgo.InteractionCreate, data *discordgo.InteractionResponseData) error {
 	return s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: content,
-		},
+		Data: data,
+	})
+}
+
+func respondWithText(s *discordgo.Session, i *discordgo.InteractionCreate, content string) error {
+	return respond(s, i, &discordgo.InteractionResponseData{
+		Content: content,
+	})
+}
+
+func respondWithHiddenText(s *discordgo.Session, i *discordgo.InteractionCreate, content string) error {
+	return respond(s, i, &discordgo.InteractionResponseData{
+		Content: message.FormatDefault("Pong!"),
+		Flags:   message.FlagVisibleToCallerOnly,
+	})
+}
+
+func respondWithEmbeds(s *discordgo.Session, i *discordgo.InteractionCreate, embeds []*discordgo.MessageEmbed) error {
+	return respond(s, i, &discordgo.InteractionResponseData{
+		Embeds: embeds,
 	})
 }
 
