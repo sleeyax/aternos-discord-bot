@@ -11,7 +11,7 @@ func CreateServerInfoEmbed(serverInfo *aternos.ServerInfo) *discordgo.MessageEmb
 		Title:       "Server info",
 		Description: fmt.Sprintf("Server '%s' is currently **%s**.", serverInfo.Name, serverInfo.StatusLabel),
 		Color:       colorMap[serverInfo.Status],
-		Footer:      footer,
+		URL:         "https://aternos.org/server/",
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name:   "Players online",
