@@ -108,7 +108,7 @@ func (ab *Bot) getWorker(guildId string) (*worker.Worker, error) {
 	}
 
 	if !ok {
-		w = worker.New(opts)
+		w = worker.New(guildId, opts)
 		ab.workers[guildId] = w
 	} else {
 		w.Reconfigure(opts)
