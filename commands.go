@@ -3,6 +3,7 @@ package aternos_discord_bot
 import "github.com/bwmarrin/discordgo"
 
 const (
+	HelpCommand      = "help"
 	PingCommand      = "ping"
 	ConfigureCommand = "configure"
 	StartCommand     = "start"
@@ -59,5 +60,9 @@ var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        PlayersCommand,
 		Description: "List active players",
+	},
+	{
+		Name:        HelpCommand,
+		Description: "Get help",
 	},
 }

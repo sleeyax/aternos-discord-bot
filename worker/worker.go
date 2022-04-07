@@ -2,7 +2,9 @@ package worker
 
 import (
 	"context"
+	"encoding/json"
 	aternos "github.com/sleeyax/aternos-api"
+	"log"
 	"time"
 )
 
@@ -11,18 +13,88 @@ func New(options *aternos.Options) *Worker {
 	return &Worker{api: aternos.New(options)}
 }
 
+// Reconfigure reconfigures the worker with given options.
 func (w *Worker) Reconfigure(options *aternos.Options) {
 	// TODO: check performance of this call
 	w.api = aternos.New(options)
 }
 
-func (w *Worker) Start() error {
-	/*conn, err := w.getWebsocketConnection()
-	if err != nil {
-		return err
-	}*/
+// Init initializes the worker.
+func (w *Worker) Init() error {
+	_, err := w.getWebsocketConnection()
+	return err
+}
 
-	return nil
+// Start starts the minecraft server.
+func (w *Worker) Start() error {
+	return w.api.StartServer()
+}
+
+// Stop stops the minecraft server.
+func (w *Worker) Stop() error {
+	return w.api.StopServer()
+}
+
+// On can be used for event handling.
+//
+// Once Init and Start have been called on the worker, the event handler will be fired whenever an interesting websocket message is received.
+func (w *Worker) On(ctx context.Context, event func(messageType string, info *aternos.ServerInfo)) {
+	ctxHeartBeat, cancelHeartBeat := context.WithCancel(context.Background())
+	ctxConfirm, cancelConfirm := context.WithCancel(context.Background())
+
+	defer func() {
+		cancelHeartBeat()
+		cancelConfirm()
+		w.wss.Close()
+		w.wss = nil
+		// TODO: log worker number (based on discord id?)
+		log.Println("Background routines stopped & connections closed.")
+	}()
+
+	for {
+		select {
+		case msg, ok := <-w.wss.Message:
+			if !ok {
+				log.Println("Message channel closed. Tying to reconnect...")
+				w.Init()
+			}
+
+			switch msg.Type {
+			case "ready":
+				event(msg.Type, w.serverInfo)
+
+				// Start sending keep-alive requests in the background (until the server is offline, see below).
+				go w.sendHeartBeats(ctxHeartBeat)
+			case "status":
+				var info aternos.ServerInfo
+				json.Unmarshal(msg.MessageBytes, &info)
+
+				switch info.Status {
+				case aternos.Online:
+					if info.StatusLabelClass == "online" && w.serverInfo.StatusLabelClass != "online" {
+						event(msg.Type, &info)
+					}
+				case aternos.Offline:
+					event(msg.Type, &info)
+					w.serverInfo = &info
+					return
+				case aternos.Preparing: // stuck in queue (only happens when traffic is high)
+					if (info.StatusLabelClass == "queueing" && info.Queue.Status == "pending") && (w.serverInfo.Queue.Status != "pending") {
+						event(msg.Type, &info)
+						go w.api.ConfirmServer(ctxConfirm, 10*time.Second)
+					}
+				case aternos.Loading:
+					event(msg.Type, &info)
+					cancelConfirm()
+				}
+
+				w.serverInfo = &info
+
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 // GetServerInfo returns minecraft server information.
@@ -32,10 +104,6 @@ func (w *Worker) GetServerInfo() (*aternos.ServerInfo, error) {
 		info, err := w.api.GetServerInfo()
 		if err != nil {
 			return nil, err
-		}
-
-		if info.DynIP == "" {
-			info.DynIP = "unavailable"
 		}
 
 		w.serverInfo = &info

@@ -1,6 +1,7 @@
 package aternos_discord_bot
 
 import (
+	"context"
 	"github.com/bwmarrin/discordgo"
 	aternos "github.com/sleeyax/aternos-api"
 	"github.com/sleeyax/aternos-discord-bot/database/models"
@@ -24,6 +25,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 	}
 
 	switch command.Name {
+	case HelpCommand:
+		sendHiddenText(message.FormatDefault("Any questions or problems? See %s for general help and %s for issues.", githubUrl, issuesUrl))
 	case PingCommand:
 		sendHiddenText(message.FormatDefault("Pong!"))
 	// TODO: only allow admin account to reconfigure
@@ -51,6 +54,10 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 	case InfoCommand:
 		fallthrough
 	case PlayersCommand:
+		fallthrough
+	case StartCommand:
+		fallthrough
+	case StopCommand:
 		w, err := ab.getWorker(i.GuildID)
 		if err != nil {
 			sendErrorText("Failed to get worker", err)
@@ -81,8 +88,64 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 				sendText(message.FormatInfo("No players online right now."))
 				break
 			}
-
 			sendText(message.FormatInfo("Active players: %s.", strings.Join(serverInfo.PlayerList, ", ")))
+		case StopCommand:
+			fallthrough
+		case StartCommand:
+			// connect to WSS
+			if err = w.Init(); err != nil {
+				sendErrorText("Failed to initialize worker! Ask an admin to reconfigure the bot and try again. See `/help` if the problem persists.", err)
+			}
+
+			// stop server
+			if command.Name == StopCommand {
+				if serverInfo.Status == aternos.Stopping || serverInfo.Status == aternos.Offline {
+					sendText(message.FormatInfo("Server already stopped! Type `/status` or `/info` to view the status."))
+					break
+				}
+
+				sendText(message.FormatInfo("Stopping the server, please wait..."))
+
+				// TODO: check if we need to put stop() in a goroutine for better performance
+				if err = w.Stop(); err != nil {
+					sendText(message.FormatError("Failed to stop the server"))
+				}
+
+				break
+			}
+
+			// start server
+			if serverInfo.Status != aternos.Offline && serverInfo.Status != aternos.Stopping {
+				sendText(message.FormatInfo("Server already started! Type `/status` or `/info` to view the status."))
+				break
+			}
+
+			sendText(message.FormatInfo("Starting the server, please wait..."))
+
+			ctx, cancel := context.WithCancel(context.Background())
+
+			go w.On(ctx, func(messageType string, info *aternos.ServerInfo) {
+				switch messageType {
+				case "ready":
+					if command.Name == StartCommand {
+						if err = w.Start(); err != nil {
+							sendErrorText("Failed to start! Ask an admin to reconfigure the bot and try again. See `/help` if the problem persists.", err)
+							cancel() // cancel the worker's goroutine
+							break
+						}
+					}
+				case "status":
+					switch info.Status {
+					case aternos.Offline:
+						fallthrough
+					case aternos.Online:
+						notification, _ := message.CreateServerStatusNotificationEmbed(info)
+						s.ChannelMessageSendEmbed(i.ChannelID, notification)
+					case aternos.Preparing:
+						sendText(message.FormatInfo("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
+					}
+				}
+			})
 		}
 	default:
 		sendText(message.FormatWarning("Command unavailable. Please try again later or refresh your discord client `CTRL + R`"))
