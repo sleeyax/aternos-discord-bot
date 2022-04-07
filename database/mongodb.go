@@ -47,19 +47,18 @@ func (db *MongoDb) Disconnect() error {
 	return db.client.Disconnect(context.Background())
 }
 
-func (db *MongoDb) GetServerSettings() ([]models.ServerSettings, error) {
+func (db *MongoDb) GetServerSettings(guildId string) (models.ServerSettings, error) {
 	collection := db.client.Database(db.DatabaseName).Collection(models.ServerSettingsTable)
 	ctx := context.Background()
 
-	cur, err := collection.Find(ctx, bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	defer cur.Close(ctx)
+	var settings models.ServerSettings
+	err := collection.FindOne(ctx, models.ServerSettings{GuildID: guildId}).Decode(&settings)
 
-	var settings []models.ServerSettings
-	if err = cur.All(ctx, &settings); err != nil {
-		return nil, err
+	if err == mongo.ErrNoDocuments {
+		return models.ServerSettings{}, ErrDataNotFound
+	}
+	if err != nil {
+		return models.ServerSettings{}, err
 	}
 
 	return settings, nil

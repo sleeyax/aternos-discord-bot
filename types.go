@@ -40,10 +40,6 @@ type Bot struct {
 	// Current discord bot session.
 	discord *discordgo.Session
 
-	// Aternos api instance.
-	// TODO: remove
-	api *aternos.Api
-
 	// List of active connections for each discord server.
 	connections []*Connection
 

@@ -3,30 +3,11 @@ package aternos_discord_bot
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	aternos "github.com/sleeyax/aternos-api"
 	"log"
-	"net/http"
 	"time"
 )
 
 func (ab *Bot) setupHandlers() {
-	// TODO: move api
-	ab.api = aternos.New(&aternos.Options{
-		Cookies: []*http.Cookie{
-			{
-				Name:  "ATERNOS_LANGUAGE",
-				Value: "en",
-			},
-			{
-				Name:  "ATERNOS_SESSION",
-				Value: ab.SessionCookie,
-			},
-			{
-				Name:  "ATERNOS_SERVER",
-				Value: ab.ServerCookie,
-			},
-		},
-	})
 	ab.discord.AddHandler(ab.handleCommands)
 	ab.discord.AddHandler(ab.handleJoinServer)
 	ab.discord.AddHandler(ab.handleLeaveServer)

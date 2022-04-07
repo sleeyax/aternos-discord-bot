@@ -9,6 +9,7 @@ const (
 	warning
 	danger
 	normal
+	loading
 )
 
 func formatMessage(text string, messageType MessageType) string {
@@ -18,9 +19,11 @@ func formatMessage(text string, messageType MessageType) string {
 	case success:
 		b.WriteString(":white_check_mark: ")
 	case warning:
-		b.WriteString(":danger: ")
+		b.WriteString(":warning: ")
 	case danger:
 		b.WriteString(":x: ")
+	case loading:
+		b.WriteString(":hourglass: ")
 	case normal:
 	default:
 		break
