@@ -23,21 +23,23 @@ func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) 
 		// We don't really need to exit the application in case the commands fail to register.
 		// In case it happens users just won't see any commands and will hopefully file an issue.
 		// Also, this won't crash our app in case of a message outage.
-		if err := ab.registerCommands(); err != nil {
-			log.Printf("Failed to register commands: %e\n", err)
-		} else {
-			log.Println("Commands registered successfully.")
-		}
+		// remove commands in go routine because it can take a while for some reason (1-2 mins)
+		go func() {
+			if err := ab.registerCommands(); err != nil {
+				log.Printf("Failed to register commands: %e\n", err)
+			}
+		}()
 	}
 }
 
 func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete) {
 	log.Printf("Left server %s (ID: %s)\n", e.Guild.Name, e.ID)
-	if err := ab.removeCommands(); err != nil {
-		log.Printf("Failed to remove commands: %e\n", err)
-	} else {
-		log.Println("Removed commands successfully.")
-	}
+	// remove commands in go routine because it can take a while for some reason (1-2 mins)
+	go func() {
+		if err := ab.removeCommands(); err != nil {
+			log.Printf("Failed to remove commands: %e\n", err)
+		}
+	}()
 }
 
 func (ab *Bot) Start() error {
