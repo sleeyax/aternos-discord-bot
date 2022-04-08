@@ -27,7 +27,7 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 
 	switch command.Name {
 	case HelpCommand:
-		sendHiddenText(message.FormatDefault("Any questions or problems? See %s for general help and %s for issues.", githubUrl, issuesUrl))
+		sendHiddenText(message.FormatDefault(faq, githubUrl))
 	case PingCommand:
 		sendHiddenText(message.FormatDefault("Pong!"))
 	// TODO: only allow admin account to reconfigure
