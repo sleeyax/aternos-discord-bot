@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: aternos-discord-bot
-          image: sleeyax/aternos-discord-bot:0.1.5
+          image: sleeyax/aternos-discord-bot:v0.2.0-beta.1
           env:
             - name: MONGO_DB_URI
               valueFrom:
@@ -61,7 +61,7 @@ spec:
             - containerPort: 27017
           env:
             # TODO: setup proper authentication
-            # NOTE: using root accounts usually isn't a good idea but in my case I'm not storing any other important data in this db + it's never publicly accessible outside of my cluster network .
+            # NOTE: using root accounts usually isn't a good idea but in my case I'm not storing any other important data in this db + it's never publicly accessible outside of my cluster network so ¯\_(ツ)_/¯.
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
