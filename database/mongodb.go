@@ -25,7 +25,7 @@ type MongoDb struct {
 	client *mongo.Client
 }
 
-func New(uri string) *MongoDb {
+func NewMongo(uri string) *MongoDb {
 	return &MongoDb{ConnectionURI: uri, ConnectionTimeout: time.Second * 10, DatabaseName: "aternos-discord-bot"}
 }
 

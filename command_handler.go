@@ -38,11 +38,6 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 			break
 		}
 
-		if ab.Database == nil {
-			sendText(message.FormatWarning("Command unavailable (no database configured)."))
-			break
-		}
-
 		options := optionsToMap(command.Options)
 
 		err := ab.Database.SaveServerSettings(&models.ServerSettings{

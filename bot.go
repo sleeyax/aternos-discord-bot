@@ -43,11 +43,10 @@ func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete)
 }
 
 func (ab *Bot) Start() error {
-	if ab.Database != nil {
-		if err := ab.Database.Connect(); err != nil {
-			return fmt.Errorf("failed to connect to database: %e", err)
-		}
+	if err := ab.Database.Connect(); err != nil {
+		return fmt.Errorf("failed to connect to database: %e", err)
 	}
+
 	ab.workers = make(map[string]*worker.Worker)
 
 	session, err := discordgo.New("Bot " + ab.DiscordToken)
@@ -62,11 +61,10 @@ func (ab *Bot) Start() error {
 }
 
 func (ab *Bot) Stop() error {
-	if ab.Database != nil {
-		if err := ab.Database.Disconnect(); err != nil {
-			return fmt.Errorf("failed to disconnect database: %e", err)
-		}
+	if err := ab.Database.Disconnect(); err != nil {
+		return fmt.Errorf("failed to disconnect database: %e", err)
 	}
+
 	return ab.discord.Close()
 }
 
@@ -128,34 +126,21 @@ func (ab *Bot) createOptions(guildId string) (*aternos.Options, error) {
 		},
 	}
 
-	if ab.Database != nil {
-		settings, err := ab.Database.GetServerSettings(guildId)
-		if err != nil {
-			return nil, err
-		}
-
-		options.Cookies = append(options.Cookies,
-			&http.Cookie{
-				Name:  "ATERNOS_SESSION",
-				Value: settings.SessionCookie,
-			},
-			&http.Cookie{
-				Name:  "ATERNOS_SERVER",
-				Value: settings.ServerCookie,
-			},
-		)
-	} else {
-		options.Cookies = append(options.Cookies,
-			&http.Cookie{
-				Name:  "ATERNOS_SESSION",
-				Value: ab.SessionCookie,
-			},
-			&http.Cookie{
-				Name:  "ATERNOS_SERVER",
-				Value: ab.ServerCookie,
-			},
-		)
+	settings, err := ab.Database.GetServerSettings(guildId)
+	if err != nil {
+		return nil, err
 	}
+
+	options.Cookies = append(options.Cookies,
+		&http.Cookie{
+			Name:  "ATERNOS_SESSION",
+			Value: settings.SessionCookie,
+		},
+		&http.Cookie{
+			Name:  "ATERNOS_SERVER",
+			Value: settings.ServerCookie,
+		},
+	)
 
 	return options, nil
 }

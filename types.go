@@ -8,19 +8,10 @@ import (
 
 type Bot struct {
 	// Database instance that implements the database.Database interface.
-	//
-	// If this is set it means the bot is operating on behalf of multiple discord servers.
-	// Otherwise, it's only configured for one; in that case SessionCookie and ServerCookie should be set.
 	Database database.Database
 
 	// Discord bot token.
 	DiscordToken string
-
-	// Aternos discord cookie (ATERNOS_SESSION).
-	SessionCookie string
-
-	// Aternos server cookie (ATERNOS_SERVER).
-	ServerCookie string
 
 	// Current discord bot session.
 	discord *discordgo.Session

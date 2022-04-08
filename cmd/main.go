@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	// TODO: cobra CLI?
-
 	// Read configuration settings from environment variables
 	token := os.Getenv("DISCORD_TOKEN")
 	session := os.Getenv("ATERNOS_SESSION")
@@ -25,13 +23,13 @@ func main() {
 	}
 
 	bot := discordBot.Bot{
-		DiscordToken:  token,
-		SessionCookie: session,
-		ServerCookie:  server,
+		DiscordToken: token,
 	}
 
 	if mongoDbUri != "" {
-		bot.Database = database.New(mongoDbUri)
+		bot.Database = database.NewMongo(mongoDbUri)
+	} else {
+		bot.Database = database.NewInMemory(session, server)
 	}
 
 	if err := bot.Start(); err != nil {
