@@ -139,7 +139,7 @@ Deployment to a kubernetes cluster is also supported.
 
 1. Create a new namespace (optional): `kubectl create ns aternos-discord-bot`
 2. Create a new secret containing the necessary environment variables (replace `<>` with the respective values): `kubectl create secret generic aternos-secrets --from-literal=DISCORD_TOKEN=<> --from-literal=ATERNOS_SERVER=<> --from-literal=MONGO_DB_URI=<> --from-literal=ATERNOS_SESSION=<>`
-3. Publish the deployment: `kubectl apply -n aternos-discord-bot -f ./kubernestes.yaml`
+3. Publish the deployment: `kubectl apply -n aternos-discord-bot -f ./kubernestes.yaml` **WARNING** you'll most likely need to edit this configuration for your specific needs. Feel free to create a PR with proper helm chart support.
 
 ## Advanced
 It's possible to integrate this package into existing go code. 
