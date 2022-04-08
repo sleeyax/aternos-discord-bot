@@ -28,16 +28,6 @@ spec:
                 secretKeyRef:
                   name: aternos-secrets
                   key: DISCORD_TOKEN
-            - name: ATERNOS_SERVER
-              valueFrom:
-                secretKeyRef:
-                  name: aternos-secrets
-                  key: ATERNOS_SERVER
-            - name: ATERNOS_SESSION
-              valueFrom:
-                secretKeyRef:
-                  name: aternos-secrets
-                  key: ATERNOS_SESSION
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,6 +49,8 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: aternos-discord-bot-mongo-pvc
+      nodeSelector:
+        pro: "true"
       containers:
         - name: aternos-discord-bot-mongo
           image: mongo:5
