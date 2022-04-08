@@ -27,11 +27,17 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 
 	switch command.Name {
 	case HelpCommand:
-		sendHiddenText(message.FormatDefault(faq, githubUrl))
+		sendHiddenText(message.FormatDefault(faq))
 	case PingCommand:
 		sendHiddenText(message.FormatDefault("Pong!"))
-	// TODO: only allow admin account to reconfigure
 	case ConfigureCommand:
+		// TODO: make the /configure command invisible to anyone by default and allow specifying a set of roles that have access to it
+		// see: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
+		if i.Member.Permissions&discordgo.PermissionAdministrator == 1 {
+			sendText(message.FormatWarning("Insufficient permissions (admin permission required)."))
+			break
+		}
+
 		if ab.Database == nil {
 			sendText(message.FormatWarning("Command unavailable (no database configured)."))
 			break
