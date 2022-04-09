@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine
+FROM golang:1.18-alpine
 
 WORKDIR /app
 
@@ -6,6 +6,7 @@ WORKDIR /app
 ENV DISCORD_TOKEN=""
 ENV ATERNOS_SESSION=""
 ENV ATERNOS_SERVER=""
+ENV MONGO_DB_URI=""
 
 # install dependencies
 COPY go.mod ./

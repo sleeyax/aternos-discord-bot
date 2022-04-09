@@ -1,4 +1,4 @@
-package aternos_discord_bot
+package message
 
 import aternos "github.com/sleeyax/aternos-api"
 

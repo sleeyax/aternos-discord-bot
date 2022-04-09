@@ -16,20 +16,83 @@ spec:
     spec:
       containers:
         - name: aternos-discord-bot
-          image: sleeyax/aternos-discord-bot:0.1.5
+          image: sleeyax/aternos-discord-bot:0.2.0-beta.2
           env:
+            - name: MONGO_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: aternos-secrets
+                  key: MONGO_DB_URI
             - name: DISCORD_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: aternos-secrets
                   key: DISCORD_TOKEN
-            - name: ATERNOS_SERVER
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aternos-discord-bot-mongo
+  labels:
+    app: aternos-discord-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aternos-discord-bot-mongo
+  template:
+    metadata:
+      labels:
+        app: aternos-discord-bot-mongo
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: aternos-discord-bot-mongo-pvc
+      nodeSelector:
+        pro: "true"
+      containers:
+        - name: aternos-discord-bot-mongo
+          image: mongo:5
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          ports:
+            - containerPort: 27017
+          env:
+            # TODO: setup proper authentication
+            # NOTE: using root accounts usually isn't a good idea but in my case I'm not storing any other important data in this db + it's never publicly accessible outside of my cluster network so ¯\_(ツ)_/¯.
+            - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: aternos-secrets
-                  key: ATERNOS_SERVER
-            - name: ATERNOS_SESSION
+                  name: aternos-mongo-secrets
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: aternos-secrets
-                  key: ATERNOS_SESSION
+                  name: aternos-mongo-secrets
+                  key: MONGO_INITDB_ROOT_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aternos-discord-bot-mongo-svc
+spec:
+  selector:
+    app: aternos-discord-bot-mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aternos-discord-bot-mongo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi

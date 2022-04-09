@@ -1,8 +1,9 @@
 package main
 
 import (
-	discordBot "aternos-discord-bot"
 	"fmt"
+	discordBot "github.com/sleeyax/aternos-discord-bot"
+	"github.com/sleeyax/aternos-discord-bot/database"
 	"log"
 	"os"
 	"os/signal"
@@ -10,22 +11,27 @@ import (
 )
 
 func main() {
-	// Read auth creds from system env vars.
+	// Read configuration settings from environment variables
 	token := os.Getenv("DISCORD_TOKEN")
 	session := os.Getenv("ATERNOS_SESSION")
 	server := os.Getenv("ATERNOS_SERVER")
+	mongoDbUri := os.Getenv("MONGO_DB_URI")
 
-	if token == "" || session == "" || server == "" {
+	// Validate values
+	if token == "" || (mongoDbUri == "" && (session == "" || server == "")) {
 		log.Fatalln("Missing environment variables!")
 	}
 
-	// Create discord bot instance.
-	bot := discordBot.AternosBot{
-		Prefix:        "!",
-		DiscordToken:  token,
-		SessionCookie: session,
-		ServerCookie:  server,
+	bot := discordBot.Bot{
+		DiscordToken: token,
 	}
+
+	if mongoDbUri != "" {
+		bot.Database = database.NewMongo(mongoDbUri)
+	} else {
+		bot.Database = database.NewInMemory(session, server)
+	}
+
 	if err := bot.Start(); err != nil {
 		log.Fatalln(err)
 	}
