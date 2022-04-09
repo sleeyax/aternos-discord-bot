@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	aternos "github.com/sleeyax/aternos-api"
 	"log"
 	"time"
@@ -10,7 +11,9 @@ import (
 
 // New creates a new Worker instance.
 func New(id string, options *aternos.Options) *Worker {
-	return &Worker{id: id, api: aternos.New(options)}
+	w := &Worker{id: id, api: aternos.New(options)}
+	w.Log("Created")
+	return w
 }
 
 func (w *Worker) Log(msg string) {
@@ -32,11 +35,13 @@ func (w *Worker) Init() error {
 
 // Start starts the minecraft server.
 func (w *Worker) Start() error {
+	w.Log("Starting server")
 	return w.api.StartServer()
 }
 
 // Stop stops the minecraft server.
 func (w *Worker) Stop() error {
+	w.Log("Stopping server")
 	return w.api.StopServer()
 }
 
@@ -59,7 +64,7 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 		select {
 		case msg, ok := <-w.wss.Message:
 			if !ok {
-				w.Log("Message channel closed. Tying to reconnect...")
+				w.Log("Message channel closed. Trying to reconnect...")
 				w.Init()
 			}
 
@@ -69,9 +74,13 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 
 				// Start sending keep-alive requests in the background (until the server is offline, see below).
 				go w.sendHeartBeats(ctxHeartBeat)
+
+				w.Log("Connection ready")
 			case "status":
 				var info aternos.ServerInfo
 				json.Unmarshal(msg.MessageBytes, &info)
+
+				w.Log(fmt.Sprintf("Server is %s", info.StatusLabel))
 
 				switch info.Status {
 				case aternos.Online:
