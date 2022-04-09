@@ -17,8 +17,6 @@ And you'll get notified once the server goes online or offline:
 
 Invite link: [click here](https://discord.com/api/oauth2/authorize?client_id=923372854874112000&permissions=0&scope=bot%20applications.commands).
 
-Once you've added the bot you might need to wait a few minutes until all commands become available (~ 2 minutes).
-
 Type `/configure` and fill in the required parameters to complete the setup.
 If you're stuck with something try `/help`.
 See [commands](#commands) below for details about every available command.

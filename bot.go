@@ -20,26 +20,11 @@ func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) 
 	// The GuildCreate event also fires after the bot has been restarted, so we have to check whether we joined recently or not.
 	if time.Now().Sub(e.JoinedAt).Minutes() <= 2 {
 		log.Printf("Joined new server %s (ID: %s)\n", e.Name, e.ID)
-		// We don't really need to exit the application in case the commands fail to register.
-		// In case it happens users just won't see any commands and will hopefully file an issue.
-		// Also, this won't crash our app in case of a message outage.
-		// remove commands in go routine because it can take a while for some reason (1-2 mins)
-		go func() {
-			if err := ab.registerCommands(); err != nil {
-				log.Printf("Failed to register commands: %e\n", err)
-			}
-		}()
 	}
 }
 
 func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete) {
-	log.Printf("Left server %s (ID: %s)\n", e.Guild.Name, e.ID)
-	// remove commands in go routine because it can take a while for some reason (1-2 mins)
-	go func() {
-		if err := ab.removeCommands(); err != nil {
-			log.Printf("Failed to remove commands: %e\n", err)
-		}
-	}()
+	log.Printf("Left server %s (ID: %s)\n", e.BeforeDelete.Name, e.BeforeDelete.ID)
 }
 
 func (ab *Bot) Start() error {
@@ -57,10 +42,18 @@ func (ab *Bot) Start() error {
 	ab.discord = session
 	ab.setupHandlers()
 
-	return ab.discord.Open()
+	if err = ab.discord.Open(); err != nil {
+		return err
+	}
+
+	return ab.registerCommands()
 }
 
 func (ab *Bot) Stop() error {
+	if err := ab.removeCommands(); err != nil {
+		return err
+	}
+
 	if err := ab.Database.Disconnect(); err != nil {
 		return fmt.Errorf("failed to disconnect database: %e", err)
 	}
@@ -70,17 +63,11 @@ func (ab *Bot) Stop() error {
 
 // registerCommands registers all available Discord commands.
 func (ab *Bot) registerCommands() error {
-	ab.registeredCommands = make([]*discordgo.ApplicationCommand, len(commands))
+	var err error
 
-	for i, v := range commands {
-		cmd, err := ab.discord.ApplicationCommandCreate(ab.discord.State.User.ID, "", v)
-		if err != nil {
-			return err
-		}
-		ab.registeredCommands[i] = cmd
-	}
+	ab.registeredCommands, err = ab.discord.ApplicationCommandBulkOverwrite(ab.discord.State.User.ID, "", commands)
 
-	return nil
+	return err
 }
 
 // removeCommands removes all Discord commands that were previously registered using registerCommands.

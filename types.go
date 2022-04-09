@@ -20,6 +20,6 @@ type Bot struct {
 	workers worker.WorkersMap
 
 	// List of registered discord commands.
-	// These can be used to delete them once the bot has been stopped or removed from the discord server.
+	// These can be used to delete them once the bot has been stopped.
 	registeredCommands []*discordgo.ApplicationCommand
 }
