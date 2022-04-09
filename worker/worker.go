@@ -84,7 +84,7 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 
 				switch info.Status {
 				case aternos.Online:
-					if info.StatusLabelClass == "online" && w.serverInfo.StatusLabelClass != "online" {
+					if info.StatusLabelClass == "online" && info.Countdown != 0 {
 						event(msg.Type, &info)
 					}
 				case aternos.Offline:
