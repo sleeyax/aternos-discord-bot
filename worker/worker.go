@@ -21,6 +21,7 @@ func (w *Worker) Log(msg string) {
 func (w *Worker) Reconfigure(options *aternos.Options) {
 	// TODO: check performance of this call
 	w.api = aternos.New(options)
+	w.serverInfo = nil
 }
 
 // Init initializes the worker.

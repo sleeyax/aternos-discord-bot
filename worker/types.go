@@ -10,7 +10,7 @@ type Worker struct {
 	id string
 
 	// Current server status.
-	// This is basically only used as a cache for the info command.
+	// This is used as a cache for the info command and periodically updated once we receive a status update message over wss.
 	serverInfo *aternos.ServerInfo
 
 	// Current active websocket connection.
