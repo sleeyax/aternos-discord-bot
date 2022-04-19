@@ -55,7 +55,8 @@ spec:
         - name: aternos-discord-bot-mongo
           image: mongo:5
           args:
-            - "--wiredTigerCacheSizeGB 0.25"
+            - mongod
+            - --wiredTigerCacheSizeGB=0.25
           volumeMounts:
             - name: data
               mountPath: /data/db
