@@ -111,9 +111,17 @@ At the moment 3 different kind of deployments are supported: CLI binary, docker 
 Each of them have instructions below.
 
 #### CLI binary
-Download the binary from [releases](https://github.com/sleeyax/aternos-discord-bot/releases), set the required environment variables & run the bot:
+Download the binary from [releases](https://github.com/sleeyax/aternos-discord-bot/releases), set the required environment variables & run the bot.
+
+Linux/MacOS:
 ```
-$ ./aternos-discord-bot
+$ DISCORD_TOKEN="" MONGO_DB_URI="" ./aternos-discord-bot
+``` 
+
+Windows:
+```
+$ set DISCORD_TOKEN="" MONGO_DB_URI=""
+$ ./aternos-discord-bot.exe
 ```
 
 Or run the latest version from source (requires Go version 1.18+):
