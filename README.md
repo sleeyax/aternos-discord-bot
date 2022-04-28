@@ -106,12 +106,11 @@ Copy and paste your `ATERNOS_SERVER` cookie here. This is only required if you d
 
 </details>
 
-### Deployment methods
-At the moment 3 different kind of deployments are supported: CLI binary, docker & kubernetes.
-Each of them have instructions below.
+### Builds
+There's several way to get this bot up and running in production.
 
 #### CLI binary
-Download the binary from [releases](https://github.com/sleeyax/aternos-discord-bot/releases), set the required environment variables & run the bot.
+Download the binary from [releases](https://github.com/sleeyax/aternos-discord-bot/releases) or [compile it](#source), set the required environment variables & run the bot.
 
 Linux/MacOS:
 ```
@@ -124,19 +123,26 @@ $ set DISCORD_TOKEN="" MONGO_DB_URI=""
 $ ./aternos-discord-bot.exe
 ```
 
-Or run the latest version from source (requires Go version 1.18+):
+Other platforms:
+
+Set the environment variables locally (or globally, if you must) and run the binary. It will show an error message when the required variables aren't set. RTFM if you don't know how to do this.
+
+#### Source
+Compilation instructions (requires Go version 1.18+):
 ```
 $ git clone https://github.com/sleeyax/aternos-discord-bot.git
 $ cd aternos-discord-bot
-$ go run ./cmd/main.go
+$ go build ./cmd/main.go
 ```
+
+This should create a binary targetting your current platform. Follow the [CLI binary](#cli-binary) instructions to execute it.
 
 #### Docker
 You can also run the bot in a docker container:
 
 `docker run -d --name aternos-discord-bot -e DISCORD_TOKEN="" -e MONGO_DB_URI="" sleeyax/aternos-discord-bot`
 
-For development you can use docker compose to spin up a local database:
+You can use docker compose to spin up a local MongoDB database as well (only recommended for development though):
 
 `docker-compose up -d`
 
