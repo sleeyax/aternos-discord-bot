@@ -5,6 +5,7 @@ import (
 	discordBot "github.com/sleeyax/aternos-discord-bot"
 	"github.com/sleeyax/aternos-discord-bot/database"
 	"log"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,6 +17,7 @@ func main() {
 	session := os.Getenv("ATERNOS_SESSION")
 	server := os.Getenv("ATERNOS_SERVER")
 	mongoDbUri := os.Getenv("MONGO_DB_URI")
+	proxy := os.Getenv("PROXY")
 
 	// Validate values
 	if token == "" || (mongoDbUri == "" && (session == "" || server == "")) {
@@ -30,6 +32,14 @@ func main() {
 		bot.Database = database.NewMongo(mongoDbUri)
 	} else {
 		bot.Database = database.NewInMemory(session, server)
+	}
+
+	if proxy != "" {
+		u, err := url.Parse(proxy)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		bot.Proxy = u
 	}
 
 	if err := bot.Start(); err != nil {

@@ -28,6 +28,11 @@ spec:
                 secretKeyRef:
                   name: aternos-secrets
                   key: DISCORD_TOKEN
+            - name: PROXY
+                valueFrom:
+                  secretKeyRef:
+                    name: aternos-secrets
+                    key: PROXY
 ---
 apiVersion: apps/v1
 kind: Deployment
