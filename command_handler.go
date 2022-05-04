@@ -106,6 +106,7 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 			// connect to WSS
 			if err = w.Init(); err != nil {
 				sendErrorText("Failed to initialize worker! Ask an admin to reconfigure the bot and try again. See `/help` if the problem persists.", err)
+				break
 			}
 
 			// stop server
