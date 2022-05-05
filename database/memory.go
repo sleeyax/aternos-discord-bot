@@ -24,7 +24,7 @@ func (m *MemoryDatabase) Disconnect() error {
 	return nil
 }
 
-func (m *MemoryDatabase) GetServerSettings(guildId string) (models.ServerSettings, error) {
+func (m *MemoryDatabase) ReadServerSettings(guildId string) (models.ServerSettings, error) {
 	return models.ServerSettings{
 		GuildID:       guildId,
 		SessionCookie: m.SessionCookie,
@@ -32,8 +32,14 @@ func (m *MemoryDatabase) GetServerSettings(guildId string) (models.ServerSetting
 	}, nil
 }
 
-func (m *MemoryDatabase) SaveServerSettings(settings *models.ServerSettings) error {
+func (m *MemoryDatabase) UpdateServerSettings(settings *models.ServerSettings) error {
 	m.SessionCookie = settings.SessionCookie
 	m.ServerCookie = settings.ServerCookie
+	return nil
+}
+
+func (m *MemoryDatabase) DeleteServerSettings(guildId string) error {
+	m.SessionCookie = ""
+	m.ServerCookie = ""
 	return nil
 }

@@ -45,7 +45,7 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 
 		options := optionsToMap(command.Options)
 
-		err := ab.Database.SaveServerSettings(&models.ServerSettings{
+		err := ab.Database.UpdateServerSettings(&models.ServerSettings{
 			GuildID:       i.GuildID,
 			SessionCookie: options[SessionOption].StringValue(),
 			ServerCookie:  options[ServerOption].StringValue(),

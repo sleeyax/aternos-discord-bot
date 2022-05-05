@@ -47,7 +47,7 @@ func (db *MongoDb) Disconnect() error {
 	return db.client.Disconnect(context.Background())
 }
 
-func (db *MongoDb) GetServerSettings(guildId string) (models.ServerSettings, error) {
+func (db *MongoDb) ReadServerSettings(guildId string) (models.ServerSettings, error) {
 	collection := db.client.Database(db.DatabaseName).Collection(models.ServerSettingsTable)
 	ctx := context.Background()
 
@@ -64,7 +64,7 @@ func (db *MongoDb) GetServerSettings(guildId string) (models.ServerSettings, err
 	return settings, nil
 }
 
-func (db *MongoDb) SaveServerSettings(settings *models.ServerSettings) error {
+func (db *MongoDb) UpdateServerSettings(settings *models.ServerSettings) error {
 	if settings.UpdatedAt == 0 {
 		settings.UpdatedAt = time.Now().UnixMilli()
 	}
@@ -86,4 +86,10 @@ func (db *MongoDb) SaveServerSettings(settings *models.ServerSettings) error {
 	}
 
 	return nil
+}
+
+func (db *MongoDb) DeleteServerSettings(guildId string) error {
+	collection := db.client.Database(db.DatabaseName).Collection(models.ServerSettingsTable)
+	_, err := collection.DeleteOne(context.Background(), models.ServerSettings{GuildID: guildId})
+	return err
 }
