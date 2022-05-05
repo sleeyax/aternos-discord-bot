@@ -1,7 +1,7 @@
 # https://docs.replit.com/programming-ide/configuring-repl
 
 language = "go"
-run = "go run ./cmd"
+run = "go run -v ./cmd"
 
 [env]
 DISCORD_TOKEN=""
