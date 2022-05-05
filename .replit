@@ -1,0 +1,11 @@
+# https://docs.replit.com/programming-ide/configuring-repl
+
+language = "go"
+run = "go run ./cmd"
+entrypoint = "README.md"
+
+[env]
+DISCORD_TOKEN=""
+ATERNOS_SESSION=""
+ATERNOS_SERVER=""
+MONGO_DB_URI=""
