@@ -2,7 +2,7 @@ FROM golang:1.18-alpine
 
 WORKDIR /app
 
-# expose available environment varuables
+# expose available environment variables
 ENV DISCORD_TOKEN=""
 ENV ATERNOS_SESSION=""
 ENV ATERNOS_SERVER=""

@@ -1,4 +1,6 @@
 # aternos discord bot
+[![Run on Repl.it](https://repl.it/badge/github/sleeyax/aternos-discord-bot)](https://repl.it/github/sleeyax/aternos-discord-bot)
+
 Simple [Aternos](https://aternos.org/) discord bot to start & stop your Minecraft server.
 
 Built using [aternos-api](https://github.com/sleeyax/aternos-api).
