@@ -15,6 +15,12 @@ const (
 	ServerOption     = "server"
 )
 
+var (
+	modPermissions  int64 = discordgo.PermissionManageServer
+	userPermissions int64 = discordgo.PermissionUseSlashCommands
+	dmPermission          = false
+)
+
 // List of available discord commands.
 var commands = []*discordgo.ApplicationCommand{
 	{
@@ -36,33 +42,49 @@ var commands = []*discordgo.ApplicationCommand{
 				ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
 			},
 		},
+		DefaultMemberPermissions: &modPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        StartCommand,
-		Description: "Start the minecraft server",
+		Name:                     StartCommand,
+		Description:              "Start the minecraft server",
+		DefaultMemberPermissions: &modPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        StopCommand,
-		Description: "Stop the minecraft server",
+		Name:                     StopCommand,
+		Description:              "Stop the minecraft server",
+		DefaultMemberPermissions: &modPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        PingCommand,
-		Description: "Check if the discord bot is still alive",
+		Name:                     PingCommand,
+		Description:              "Check if the discord bot is still alive",
+		DefaultMemberPermissions: &userPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        StatusCommand,
-		Description: "Get the minecraft server status",
+		Name:                     StatusCommand,
+		Description:              "Get the minecraft server status",
+		DefaultMemberPermissions: &userPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        InfoCommand,
-		Description: "Get detailed information about the minecraft server status",
+		Name:                     InfoCommand,
+		Description:              "Get detailed information about the minecraft server status",
+		DefaultMemberPermissions: &userPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        PlayersCommand,
-		Description: "List active players",
+		Name:                     PlayersCommand,
+		Description:              "List active players",
+		DefaultMemberPermissions: &userPermissions,
+		DMPermission:             &dmPermission,
 	},
 	{
-		Name:        HelpCommand,
-		Description: "Get help",
+		Name:                     HelpCommand,
+		Description:              "Get help",
+		DefaultMemberPermissions: &modPermissions,
+		DMPermission:             &dmPermission,
 	},
 }

@@ -25,24 +25,12 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		respondWithError(s, i, content, err)
 	}
 
-	if i.GuildID == "" {
-		sendText(message.FormatWarning("Direct messages are not supported. Use commands within your server."))
-		return
-	}
-
 	switch command.Name {
 	case HelpCommand:
 		sendHiddenText(message.FormatDefault(faq))
 	case PingCommand:
 		sendHiddenText(message.FormatDefault("Pong!"))
 	case ConfigureCommand:
-		// TODO: make the /configure command invisible to anyone by default and allow specifying a set of roles that have access to it
-		// see: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
-		if i.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-			sendText(message.FormatWarning("Insufficient permissions (admin permission required)."))
-			break
-		}
-
 		options := optionsToMap(command.Options)
 
 		err := ab.Database.UpdateServerSettings(&models.ServerSettings{
