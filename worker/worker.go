@@ -64,8 +64,16 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 		select {
 		case msg, ok := <-w.wss.Message:
 			if !ok {
-				w.Log("Message channel closed. Trying to reconnect...")
+				if w.wssRetries == maxWssRetries {
+					w.Log("Max number of websocket connection retries reached.")
+					event("connection_error", nil) // TODO: find better way to communicate errors
+					return
+				}
+
+				w.Log(fmt.Sprintf("Message channel closed. Trying to reconnect %d more time(s)...", maxWssRetries-w.wssRetries))
+				time.Sleep(time.Second * 3)
 				w.Init()
+				w.wssRetries++
 			}
 
 			switch msg.Type {

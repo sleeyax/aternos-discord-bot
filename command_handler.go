@@ -93,7 +93,7 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		case StartCommand:
 			// connect to WSS
 			if err = w.Init(); err != nil {
-				sendErrorText("Failed to initialize worker! Ask an admin to reconfigure the bot and try again. See `/help` if the problem persists.", err)
+				sendErrorText("Failed to initialize worker! See `/help` or try again later.", err)
 				break
 			}
 
@@ -147,6 +147,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 						s.ChannelMessageSend(i.ChannelID, message.FormatInfo("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
 						w.Log("Waiting in queue...")
 					}
+				case "connection_error":
+					s.ChannelMessageSend(i.ChannelID, message.FormatError("Failed to initialize worker (websocket connection timeout)! See `/help` or try again later."))
 				}
 			})
 		}

@@ -2,6 +2,9 @@ package worker
 
 import aternos "github.com/sleeyax/aternos-api"
 
+// The maximum number of times to try reconnecting to the websocket server on error.
+const maxWssRetries = 3
+
 type WorkersMap map[string]*Worker
 
 // Worker represents a single worker that can connect to aternos for a specific message guild.
@@ -18,4 +21,7 @@ type Worker struct {
 
 	// Aternos API instance.
 	api *aternos.Api
+
+	// Current amount of websocket connection wssRetries (maximum maxWssRetries).
+	wssRetries int
 }
