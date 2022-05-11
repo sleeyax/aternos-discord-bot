@@ -1,4 +1,4 @@
-# aternos discord bot TOS
+# aternos discord bot privacy policy
 By using this discord bot you automatically agree to the following privacy terms:
 
 Persistent data that we store to provide the service:
