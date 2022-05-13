@@ -111,7 +111,8 @@ func (ab *Bot) createOptions(guildId string) (*aternos.Options, error) {
 				Value: "en",
 			},
 		},
-		Proxy: ab.Proxy,
+		Proxy:              ab.Proxy,
+		InsecureSkipVerify: true,
 	}
 
 	settings, err := ab.Database.GetServerSettings(guildId)

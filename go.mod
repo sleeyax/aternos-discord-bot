@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/bwmarrin/discordgo v0.24.0
-	github.com/sleeyax/aternos-api v0.3.4
+	github.com/sleeyax/aternos-api v0.3.6
 	go.mongodb.org/mongo-driver v1.9.0
 )
 
@@ -23,9 +23,9 @@ require (
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/refraction-networking/utls v1.0.0 // indirect
-	github.com/sleeyax/gotcha v0.0.2 // indirect
-	github.com/sleeyax/gotcha/adapters/fhttp v0.0.0-20211225143732-1ae0bde30de1 // indirect
-	github.com/useflyent/fhttp v0.0.0-20210801005649-f160dd923789 // indirect
+	github.com/sleeyax/gotcha v0.1.3 // indirect
+	github.com/sleeyax/gotcha/adapters/fhttp v0.0.0-20220513160314-4b06cd561da9 // indirect
+	github.com/useflyent/fhttp v0.0.0-20211004035111-333f430cfbbf // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect
 	github.com/xdg-go/stringprep v1.0.2 // indirect
@@ -38,3 +38,5 @@ require (
 )
 
 replace github.com/refraction-networking/utls => github.com/sleeyax/utls v1.1.1
+
+replace github.com/gorilla/websocket => github.com/sleeyax/websocket v1.5.1-0.20220512160613-502bd65db8ae
