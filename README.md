@@ -106,6 +106,10 @@ Copy and paste your `ATERNOS_SESSION` cookie here. This is only required if you 
 
 Copy and paste your `ATERNOS_SERVER` cookie here. This is only required if you don't want to use MongoDB. Credentials are stored in memory.
 
+`PROXY`
+
+HTTP(S) proxy to use for all outgoing connections. This should preferably be a stable rotating proxy when applied in production.
+
 </details>
 
 ### Builds

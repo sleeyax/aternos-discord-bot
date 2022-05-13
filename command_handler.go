@@ -67,10 +67,11 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		if err != nil {
 			if err == aternos.UnauthenticatedError {
 				sendText(message.FormatError("Invalid credentials. Use `/configure` to reconfigure the bot."))
-				break
+			} else if err == aternos.ForbiddenError {
+				sendText(message.FormatError("Access forbidden. Please try again later."))
+			} else {
+				sendErrorText("Failed to get server info", err)
 			}
-
-			sendErrorText("Failed to get server info", err)
 
 			break
 		}

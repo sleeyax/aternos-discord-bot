@@ -7,6 +7,7 @@ ENV DISCORD_TOKEN=""
 ENV ATERNOS_SESSION=""
 ENV ATERNOS_SERVER=""
 ENV MONGO_DB_URI=""
+ENV PROXY=""
 
 # install dependencies
 COPY go.mod ./

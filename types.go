@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/sleeyax/aternos-discord-bot/database"
 	"github.com/sleeyax/aternos-discord-bot/worker"
+	"net/url"
 )
 
 type Bot struct {
@@ -12,6 +13,17 @@ type Bot struct {
 
 	// Discord bot token.
 	DiscordToken string
+
+	// HTTP(S) proxy to connect to.
+	//
+	// Format: protocol://username:password@host:port
+	//
+	// Examples:
+	//
+	// http://127.0.0.1:8888
+	//
+	// http://username:password@1.2.3.4:1234
+	Proxy *url.URL
 
 	// Current discord bot session.
 	discord *discordgo.Session
