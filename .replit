@@ -1,0 +1,20 @@
+# https://docs.replit.com/programming-ide/configuring-repl
+
+language = "go"
+run = "go run -v ./cmd"
+
+[env]
+DISCORD_TOKEN=""
+ATERNOS_SESSION=""
+ATERNOS_SERVER=""
+MONGO_DB_URI=""
+
+[languages.go]
+pattern = "**/*.go"
+
+[languages.go.languageServer]
+start = "gopls"
+
+[nix]
+# TODO: move back to stable once go version 1.18 has been added
+channel = "unstable"

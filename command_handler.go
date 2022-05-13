@@ -25,27 +25,15 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		respondWithError(s, i, content, err)
 	}
 
-	if i.GuildID == "" {
-		sendText(message.FormatWarning("Direct messages are not supported. Use commands within your server."))
-		return
-	}
-
 	switch command.Name {
 	case HelpCommand:
 		sendHiddenText(message.FormatDefault(faq))
 	case PingCommand:
 		sendHiddenText(message.FormatDefault("Pong!"))
 	case ConfigureCommand:
-		// TODO: make the /configure command invisible to anyone by default and allow specifying a set of roles that have access to it
-		// see: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
-		if i.Member.Permissions&discordgo.PermissionAdministrator == 0 {
-			sendText(message.FormatWarning("Insufficient permissions (admin permission required)."))
-			break
-		}
-
 		options := optionsToMap(command.Options)
 
-		err := ab.Database.SaveServerSettings(&models.ServerSettings{
+		err := ab.Database.UpdateServerSettings(&models.ServerSettings{
 			GuildID:       i.GuildID,
 			SessionCookie: options[SessionOption].StringValue(),
 			ServerCookie:  options[ServerOption].StringValue(),
@@ -106,7 +94,7 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		case StartCommand:
 			// connect to WSS
 			if err = w.Init(); err != nil {
-				sendErrorText("Failed to initialize worker! Ask an admin to reconfigure the bot and try again. See `/help` if the problem persists.", err)
+				sendErrorText("Failed to initialize worker! See `/help` or try again later.", err)
 				break
 			}
 
@@ -160,6 +148,8 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 						s.ChannelMessageSend(i.ChannelID, message.FormatInfo("Waiting in queue (%d/%d, %s)...", info.Queue.Position, info.Queue.Count, info.Queue.Time))
 						w.Log("Waiting in queue...")
 					}
+				case "connection_error":
+					s.ChannelMessageSend(i.ChannelID, message.FormatError("Failed to initialize worker (websocket connection timeout)! See `/help` or try again later."))
 				}
 			})
 		}

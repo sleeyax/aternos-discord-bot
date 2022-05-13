@@ -11,6 +11,7 @@ var ErrDataNotFound = errors.New("database: row or document data not found")
 type Database interface {
 	Connect() error
 	Disconnect() error
-	GetServerSettings(guildId string) (models.ServerSettings, error)
-	SaveServerSettings(settings *models.ServerSettings) error
+	ReadServerSettings(guildId string) (models.ServerSettings, error)
+	UpdateServerSettings(settings *models.ServerSettings) error
+	DeleteServerSettings(guildId string) error
 }

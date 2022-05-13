@@ -25,6 +25,7 @@ func (ab *Bot) handleJoinServer(s *discordgo.Session, e *discordgo.GuildCreate) 
 
 func (ab *Bot) handleLeaveServer(s *discordgo.Session, e *discordgo.GuildDelete) {
 	log.Printf("Left server %s (ID: %s)\n", e.BeforeDelete.Name, e.BeforeDelete.ID)
+	ab.Database.DeleteServerSettings(e.BeforeDelete.ID)
 }
 
 func (ab *Bot) Start() error {
@@ -115,7 +116,7 @@ func (ab *Bot) createOptions(guildId string) (*aternos.Options, error) {
 		InsecureSkipVerify: true,
 	}
 
-	settings, err := ab.Database.GetServerSettings(guildId)
+	settings, err := ab.Database.ReadServerSettings(guildId)
 	if err != nil {
 		return nil, err
 	}

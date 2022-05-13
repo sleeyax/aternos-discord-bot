@@ -1,4 +1,6 @@
 # aternos discord bot
+[![Run on Repl.it](https://repl.it/badge/github/sleeyax/aternos-discord-bot)](https://repl.it/github/sleeyax/aternos-discord-bot)
+
 Simple [Aternos](https://aternos.org/) discord bot to start & stop your Minecraft server.
 
 Built using [aternos-api](https://github.com/sleeyax/aternos-api).
@@ -156,6 +158,11 @@ Deployment to a kubernetes cluster is also supported.
 1. Create a new namespace (optional): `kubectl create ns aternos-discord-bot`
 2. Create a new secret containing the necessary environment variables (replace `<>` with the respective values): `kubectl create secret generic aternos-secrets --from-literal=DISCORD_TOKEN=<> --from-literal=ATERNOS_SERVER=<> --from-literal=MONGO_DB_URI=<> --from-literal=ATERNOS_SESSION=<>`
 3. Publish the deployment: `kubectl apply -n aternos-discord-bot -f ./kubernestes.yaml` **WARNING** you'll most likely need to edit this configuration for your specific needs. Feel free to create a PR with proper helm chart support.
+
+#### Replit
+Running the bot on replit is not recommended (by me) because it's slow and impractical, though if you really want to use it for some reason you can run or fork [this template](https://repl.it/github/sleeyax/aternos-discord-bot).
+Please keep in mind that it may take a while for dependencies to install. 
+You may even have to press the 'run' button several times until everything is installed properly (this is likely not an issue if you have a paid plan).
 
 ## Advanced
 It's possible to integrate this package into existing go code. 

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: aternos-discord-bot
-          image: sleeyax/aternos-discord-bot:0.2.0
+          image: sleeyax/aternos-discord-bot:0.3.0
           env:
             - name: MONGO_DB_URI
               valueFrom:
