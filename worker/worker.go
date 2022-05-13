@@ -22,8 +22,7 @@ func (w *Worker) Log(msg string) {
 
 // Reconfigure reconfigures the worker with given options.
 func (w *Worker) Reconfigure(options *aternos.Options) {
-	// TODO: check performance of this call
-	w.api = aternos.New(options)
+	w.api.Options = options
 	w.serverInfo = nil
 }
 

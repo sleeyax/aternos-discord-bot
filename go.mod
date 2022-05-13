@@ -3,9 +3,9 @@ module github.com/sleeyax/aternos-discord-bot
 go 1.18
 
 require (
-	github.com/sleeyax/aternos-api v0.3.6
 	// TODO: wait for v0.26.x release to include slash commands v2 (https://github.com/bwmarrin/discordgo/pull/1075)
 	github.com/bwmarrin/discordgo v0.25.1-0.20220506203013-e1f154bfe70e
+	github.com/sleeyax/aternos-api v0.3.7
 	go.mongodb.org/mongo-driver v1.9.0
 )
 
