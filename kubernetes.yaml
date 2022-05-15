@@ -55,7 +55,7 @@ spec:
           persistentVolumeClaim:
             claimName: aternos-discord-bot-mongo-pvc
       nodeSelector:
-        pro: "true"
+        pro: "false"
       containers:
         - name: aternos-discord-bot-mongo
           image: mongo:5
