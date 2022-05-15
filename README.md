@@ -15,6 +15,8 @@ And you'll get notified once the server goes online or offline:
 ![screenshot2](./docs/img/screenshot2.png)
 
 ## Add the bot to your server
+**!!!WARNING: this public instance is no longer supported and serves only as a demo at this point. Use at your own risk!!!**
+
 **By adding the bot to your server you automatically agree to the [TOS](TOS.md).**
 
 Invite link: [click here](https://discord.com/api/oauth2/authorize?client_id=923372854874112000&permissions=0&scope=bot%20applications.commands).
@@ -23,7 +25,7 @@ Type `/configure` and fill in the required parameters to complete the setup.
 If you're stuck with something try `/help`.
 See [commands](#commands) below for details about every available command.
 
-If you'd rather host the bot yourself, see the section about [self hosting](#self-hosting) below.
+If you'd rather host the bot yourself (recommended), see the section about [self hosting](#self-hosting) below.
 
 ## Commands
 All available slash commands.
