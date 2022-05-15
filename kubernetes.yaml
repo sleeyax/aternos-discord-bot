@@ -14,6 +14,8 @@ spec:
       labels:
         app: aternos-discord-bot
     spec:
+      nodeSelector:
+        pro: "false"
       containers:
         - name: aternos-discord-bot
           image: sleeyax/aternos-discord-bot:0.3.2
@@ -55,7 +57,7 @@ spec:
           persistentVolumeClaim:
             claimName: aternos-discord-bot-mongo-pvc
       nodeSelector:
-        pro: "false"
+        pro: "true"
       containers:
         - name: aternos-discord-bot-mongo
           image: mongo:5
