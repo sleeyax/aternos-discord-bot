@@ -55,7 +55,6 @@ func (w *Worker) On(ctx context.Context, event func(messageType string, info *at
 		cancelHeartBeat()
 		cancelConfirm()
 		w.wss.Close()
-		w.wss = nil
 		w.Log("Background routines stopped & connections closed")
 	}()
 
