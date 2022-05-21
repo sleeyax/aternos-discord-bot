@@ -112,6 +112,8 @@ Copy and paste your `ATERNOS_SERVER` cookie here. This is only required if you d
 
 HTTP(S) proxy to use for all outgoing connections. This should preferably be a stable rotating proxy when applied in production.
 
+**Warning: proxies are currently in a broken state, see [this issue](https://github.com/sleeyax/aternos-api/issues/4). Help wanted.**
+
 </details>
 
 ### Builds
