@@ -127,7 +127,8 @@ $ DISCORD_TOKEN="" MONGO_DB_URI="" ./aternos-discord-bot
 
 Windows:
 ```
-$ set DISCORD_TOKEN="" MONGO_DB_URI=""
+$ set DISCORD_TOKEN=<value>
+$ set MONGO_DB_URI=<value>
 $ ./aternos-discord-bot.exe
 ```
 
