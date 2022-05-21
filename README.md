@@ -115,7 +115,7 @@ HTTP(S) proxy to use for all outgoing connections. This should preferably be a s
 </details>
 
 ### Builds
-There's several way to get this bot up and running in production.
+There's several ways to get this bot up and running in production.
 
 #### CLI binary
 Download the binary from [releases](https://github.com/sleeyax/aternos-discord-bot/releases) or [compile it](#source), set the required environment variables & run the bot.
