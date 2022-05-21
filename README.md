@@ -129,7 +129,7 @@ Windows:
 ```
 $ set DISCORD_TOKEN=<value>
 $ set MONGO_DB_URI=<value>
-$ ./aternos-discord-bot.exe
+$ aternos-discord-bot.exe
 ```
 
 Other platforms:
