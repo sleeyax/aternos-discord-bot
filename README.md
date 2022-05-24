@@ -146,7 +146,7 @@ $ cd aternos-discord-bot
 $ go build ./cmd/main.go
 ```
 
-This should create a binary targetting your current platform. Follow the [CLI binary](#cli-binary) instructions to execute it.
+This should create a binary targeting your current platform. Follow the [CLI binary](#cli-binary) instructions to execute it.
 
 #### Docker
 You can also run the bot in a docker container:
@@ -156,6 +156,8 @@ You can also run the bot in a docker container:
 You can use docker compose to spin up a local MongoDB database as well (only recommended for development though):
 
 `docker-compose up -d`
+
+See [scripts](./scripts/docker) for a production-ready installation script that does most of the Docker setup for you on a Linux VPS.
 
 #### Kubernetes
 Deployment to a kubernetes cluster is also supported. 
