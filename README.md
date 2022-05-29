@@ -143,7 +143,7 @@ Compilation instructions (requires Go version 1.18+):
 ```
 $ git clone https://github.com/sleeyax/aternos-discord-bot.git
 $ cd aternos-discord-bot
-$ go build ./cmd/main.go
+$ go build -o aternos-discord-bot ./cmd/main.go
 ```
 
 This should create a binary targeting your current platform. Follow the [CLI binary](#cli-binary) instructions to execute it.
