@@ -18,7 +18,7 @@ spec:
         pro: "false"
       containers:
         - name: aternos-discord-bot
-          image: sleeyax/aternos-discord-bot:0.3.3
+          image: sleeyax/aternos-discord-bot:0.3.4
           env:
             - name: MONGO_DB_URI
               valueFrom:
