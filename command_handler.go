@@ -25,6 +25,9 @@ func (ab *Bot) handleCommands(s *discordgo.Session, i *discordgo.InteractionCrea
 		respondWithError(s, i, content, err)
 	}
 
+	sendErrorText("This bot instance is no longer supported and is shutting down soon. Please read https://github.com/sleeyax/aternos-discord-bot/discussions/61 for more information.", nil)
+	return
+
 	switch command.Name {
 	case HelpCommand:
 		sendHiddenText(message.FormatDefault(faq))
