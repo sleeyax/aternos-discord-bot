@@ -155,6 +155,11 @@ Deployment to a kubernetes cluster is also supported.
 2. Create a new secret containing the necessary environment variables (replace `<>` with the respective values): `kubectl create secret generic aternos-secrets --from-literal=DISCORD_TOKEN=<> --from-literal=ATERNOS_SERVER=<> --from-literal=MONGO_DB_URI=<> --from-literal=ATERNOS_SESSION=<>`
 3. Publish the deployment: `kubectl apply -n aternos-discord-bot -f ./kubernestes.yaml` **WARNING** you'll most likely need to edit this configuration for your specific needs. Feel free to create a PR with proper helm chart support.
 
+
+#### Replit
+Running the bot on replit is not recommended because it's slow and could be IP banned easily, though if you really want to use it you can run or fork [this template](https://repl.it/github/sleeyax/aternos-discord-bot).
+A **paid replit account** is likely **required** for this to work.
+
 ## Advanced
 It's possible to integrate this package into existing go code. 
 Useful if you want to further customize the bot or want to do additional things after launching it. 
