@@ -22,7 +22,7 @@ func respondWithText(s *discordgo.Session, i *discordgo.InteractionCreate, conte
 func respondWithHiddenText(s *discordgo.Session, i *discordgo.InteractionCreate, content string) error {
 	return respond(s, i, &discordgo.InteractionResponseData{
 		Content: message.FormatDefault(content),
-		Flags:   message.FlagVisibleToCallerOnly,
+		Flags:   discordgo.MessageFlagsEphemeral,
 	})
 }
 
