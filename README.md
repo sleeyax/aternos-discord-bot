@@ -1,3 +1,5 @@
+> **⚠️ Your aternos account may be banned at any time. Use this software at your own risk. For more information read our [TOS](https://github.com/sleeyax/aternos-discord-bot/blob/main/TOS.md).**
+
 # aternos discord bot
 Simple [Aternos](https://aternos.org/) discord bot to start & stop your Minecraft server.
 
